@@ -1,21 +1,19 @@
-import React, { useState } from 'react';
+import{ useState } from 'react';
 import axios from 'axios';
 //import { useNavigate } from 'react-router-dom';
 
 function Signup() {
    //const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-  });
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
+  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,13 +21,17 @@ function Signup() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('http://localhost:3000/api/users/signup', formData); // Change URL as needed
+      const { data } = await axios.post('http://localhost:3000/api/signup', {username, email, password}); // Change URL as needed
       // Save token & user on successful signup (auto login)
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
+      setUsername('');
+      setEmail('');
+      setPassword('');
+
 
       setLoading(false);
-     navigate('/'); // Redirect to home/dashboard after signup
+    //  navigate('/'); // Redirect to home/dashboard after signup
     } catch (err) {
       setLoading(false);
       setError(err.response?.data?.message || 'Signup failed');
@@ -56,8 +58,8 @@ function Signup() {
               type="text"
               name="username"
               id="username"
-              value={formData.username}
-              onChange={handleChange}
+              value={username}
+              onChange={(e)=>setUsername(e.target.value)}
               required
               placeholder="Your username"
               className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-700"
@@ -72,8 +74,8 @@ function Signup() {
               type="email"
               name="email"
               id="email"
-              value={formData.email}
-              onChange={handleChange}
+              value={email}
+              onChange={(e)=>setEmail(e.target.value)}
               required
               placeholder="you@example.com"
               className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -88,8 +90,8 @@ function Signup() {
               type="password"
               name="password"
               id="password"
-              value={formData.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e)=>setPassword(e.target.value)}
               required
               placeholder="Create a password"
               className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"

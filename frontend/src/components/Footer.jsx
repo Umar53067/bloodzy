@@ -1,4 +1,4 @@
-import { FaFacebookF, FaTwitter, FaInstagram } from 'react-icons/fa';
+import { Facebook, Twitter, Instagram } from "lucide-react";
 
 function Footer() {
   return (
@@ -9,7 +9,7 @@ function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="h-8 w-8 rounded-full bg-red-600"></div>
-              <span className="text-xl font-bold text-red-600">BloodConnect</span>
+              <span className="text-xl font-bold text-red-600">Bloodzy</span>
             </div>
             <p className="text-sm text-gray-500">
               Connecting blood donors with those in need, saving lives one donation at a time.
@@ -43,20 +43,20 @@ function Footer() {
             <h3 className="mb-4 text-sm font-semibold text-gray-700">Contact</h3>
             <ul className="space-y-2 text-sm text-gray-500">
               <li>123 Blood St, City</li>
-              <li>info@bloodconnect.org</li>
+              <li>info@bloodzy.org</li>
               <li>+1 (555) 123-4567</li>
             </ul>
             <div className="mt-4 flex gap-4 text-gray-500">
-              <a href="#"><FaFacebookF className="hover:text-gray-900" /></a>
-              <a href="#"><FaTwitter className="hover:text-gray-900" /></a>
-              <a href="#"><FaInstagram className="hover:text-gray-900" /></a>
+              <a href="#"><Facebook className="h-5 w-5 hover:text-gray-900" /></a>
+              <a href="#"><Twitter className="h-5 w-5 hover:text-gray-900" /></a>
+              <a href="#"><Instagram className="h-5 w-5 hover:text-gray-900" /></a>
             </div>
           </div>
         </div>
 
         {/* Bottom copyright */}
         <div className="mt-10 border-t pt-6 text-center text-sm text-gray-400">
-          <p>© {new Date().getFullYear()} BloodConnect. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Bloodzy. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -1,40 +1,39 @@
 import { useState } from 'react';
 import axios from 'axios';
-//import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 // import { login } from '../features/auth/authSlice.js';
-// import {useDispatch} from 'react-redux'
+// import { useDispatch } from 'react-redux';
 
 function Login() {
-  //const navigate = useNavigate();
+  // const navigate = useNavigate();
+  // const dispatch = useDispatch();
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
-
-  //const dispatch = useDispatch()
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      const { data } = await axios.post('http://localhost:3000/api/users/login', formData,  { withCredentials: true } ); // change URL as needed
+      const { data } = await axios.post(
+        'http://localhost:3000/api/users/login',
+        { email, password }, // direct states bheje
+        { withCredentials: true }
+      );
+
       // Save token to localStorage (or Redux)
       localStorage.setItem('token', data.token);
-      dispatch(login(data))
-      
+      // dispatch(login(data));
+
       // Optionally save user info
       localStorage.setItem('user', JSON.stringify(data.user));
 
       setLoading(false);
-      navigate('/'); // redirect to home or dashboard
+      // navigate('/'); // redirect to home or dashboard
     } catch (err) {
       setLoading(false);
       setError(err.response?.data?.message || 'Login failed');
@@ -59,10 +58,9 @@ function Login() {
             </label>
             <input
               type="email"
-              name="email"
               id="email"
-              value={formData.email}
-              onChange={handleChange}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="you@example.com"
               className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -75,10 +73,9 @@ function Login() {
             </label>
             <input
               type="password"
-              name="password"
               id="password"
-              value={formData.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Enter your password"
               className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
