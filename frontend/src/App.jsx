@@ -11,6 +11,7 @@ import Header from './components/Header.jsx'
 import Footer from './components/Footer.jsx'
 import Profile from './pages/Profile.jsx'
 import EditProfile from './pages/EditProfile.jsx'
+import Admin from './pages/Admin.jsx'
 
 function App() {
   return (
@@ -25,7 +26,8 @@ function App() {
         <Route path='/forgot-password' element={<ForgotPassword/>} />
         <Route path='/reset-password' element={<ResetPassword/>} />
         <Route path='/profile' element={<Profile/>} />
-        <Route path='/edit-profile' element={<EditProfile/>} />
+        <Route path='/edit-profile' element={<EditProfile/>} />    
+        <Route path='/admin' element={<Admin/>} />
       </Routes>
       <Footer/>
     </BrowserRouter>
