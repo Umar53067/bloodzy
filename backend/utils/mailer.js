@@ -1,33 +1,52 @@
-import nodemailer from 'nodemailer'
+import nodemailer from "nodemailer";
+
+
+
+// const transporter = nodemailer.createTransport({
+//   host: "sandbox.smtp.mailtrap.io",
+//   port: 2525,
+//   secure: false, 
+//   auth: {
+//     user: process.env.MAILTRAP_USER,
+//     pass: process.env.MAILTRAP_PASS,
+//   },
+//     auth: "LOGIN", // 👈 force LOGIN instead of PLAIN
+// });
 
 // Looking to send emails in production? Check out our Email API/SMTP product!
-var transport = nodemailer.createTransport({
+var transporter = nodemailer.createTransport({
   host: "sandbox.smtp.mailtrap.io",
   port: 2525,
   auth: {
-    user: "3cb857cd79c25e",
-    pass: "5b445e9ef2aae1"
+    user: "0c8d89f2462cea",
+    pass: "3ef67932ac06c2"
   }
 });
 
-const mailOptions = {
-    from: 'your-email@example.com', // Sender address
-    to: 'recipient@example.com', // Recipient address (can be a comma-separated string for multiple recipients)
-    subject: 'Subject of your email',
-    text: 'This is the plain text body of your email.', // Plain text body
-    html: '<b>This is the HTML body of your email</b>' // HTML body (optional, will be used over text if both are provided)
-    // attachments: [ // Optional: Attachments
-    //     {
-    //         filename: 'example.pdf',
-    //         path: '/path/to/your/file.pdf'
-    //     }
-    // ]
-};
+export const sendEmail = async ({ to, subject, text, html }) => {
+            
 
-transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-        console.error('Error sending email:', error);
-    } else {
-        console.log('Email sent:', info.response);
-    }
+   transporter.verify((error, success) => {
+  if (error) {
+    console.error("SMTP connection error:", error);
+  } else {
+    console.log("SMTP server is ready to send messages ✅");
+  }
 });
+         
+
+  try {
+    const info = await transporter.sendMail({
+      from: '"MyApp Support" <no-reply@bloodzy.com>', // Send
+      to,
+      subject,
+      text,
+      html,
+    });
+    console.log("✅ Email sent:", info.messageId);
+    return info;
+  } catch (error) {
+    console.error("❌ Email sending failed:", error);
+    throw error;
+  }
+};

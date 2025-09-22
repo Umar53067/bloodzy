@@ -1,5 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
+import { Link } from 'react-router-dom';
+
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -15,7 +17,7 @@ function ForgotPassword() {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:3000/api/users/forgot-password",
+        "http://localhost:3000/api/forgot-password",
         { email }
       );
 
@@ -75,9 +77,9 @@ function ForgotPassword() {
 
         <p className="mt-6 text-center text-gray-600">
           Remembered your password?{" "}
-          <a href="/login" className="text-red-600 hover:underline">
+          <Link to="/login" className="text-red-600 hover:underline">
             Login
-          </a>
+          </Link>
         </p>
       </div>
     </div>

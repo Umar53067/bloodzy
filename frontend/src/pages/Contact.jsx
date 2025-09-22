@@ -40,7 +40,7 @@ function Contact() {
               <Mail className="h-6 w-6 text-red-600 mt-1" />
               <div>
                 <p className="font-semibold">Email</p>
-                <p className="text-gray-600">support@bloodconnect.org</p>
+                <p className="text-gray-600">support@bloodzy.org</p>
               </div>
             </li>
             <li className="flex items-start gap-4">
@@ -124,11 +124,6 @@ function Contact() {
           loading="lazy"
         ></iframe>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-100 py-6 text-center text-sm text-gray-600">
-        <p>&copy; {new Date().getFullYear()} BloodConnect. All Rights Reserved.</p>
-      </footer>
     </div>
   );
 }

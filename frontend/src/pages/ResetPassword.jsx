@@ -4,6 +4,7 @@ import axios from "axios";
 
 function ResetPassword() {
   const { token } = useParams();
+  
   const navigate = useNavigate();
 
   const [newPassword, setNewPassword] = useState("");
@@ -19,7 +20,7 @@ function ResetPassword() {
 
     try {
       const { data } = await axios.post(
-        `http://localhost:3000/api/users/reset-password/${token}`,
+        `http://localhost:3000/api/reset-password/${token}`,
         { newPassword }
       );
 

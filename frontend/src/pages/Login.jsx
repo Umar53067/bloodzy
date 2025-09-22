@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
-// import { login } from '../features/auth/authSlice.js';
-// import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { login } from '../features/auth/authSlice.js';
+import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
 
 function Login() {
-  // const navigate = useNavigate();
-  // const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -20,20 +21,20 @@ function Login() {
 
     try {
       const { data } = await axios.post(
-        'http://localhost:3000/api/users/login',
+        'http://localhost:3000/api/login',
         { email, password }, // direct states bheje
-        { withCredentials: true }
+       // { withCredentials: true }
       );
 
       // Save token to localStorage (or Redux)
       localStorage.setItem('token', data.token);
-      // dispatch(login(data));
+      dispatch(login(data));
 
       // Optionally save user info
       localStorage.setItem('user', JSON.stringify(data.user));
 
       setLoading(false);
-      // navigate('/'); // redirect to home or dashboard
+      navigate('/'); // redirect to home or dashboard
     } catch (err) {
       setLoading(false);
       setError(err.response?.data?.message || 'Login failed');
@@ -95,9 +96,15 @@ function Login() {
 
         <p className="mt-6 text-center text-gray-600">
           Don’t have an account?{' '}
-          <a href="/signup" className="text-red-600 hover:underline">
+          <Link to="/signup" className="text-red-600 hover:underline">
             Sign up
-          </a>
+          </Link>
+        </p>
+        <p className="mt-6 text-center text-gray-600">
+          You forgot your password?{' '}
+          <Link to="/forgot-password" className="text-blue-600 hover:underline">
+            Click here
+          </Link>
         </p>
       </div>
     </div>
