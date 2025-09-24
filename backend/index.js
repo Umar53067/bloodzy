@@ -9,9 +9,10 @@ dotenv.config()
 
 app.use(json())
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.CLIENT_URL,
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }))
+console.log("Frontend url", process.env.CLIENT_URL)
 app.use(morgan('dev'))
 app.use('/api',authRoutes)
 
