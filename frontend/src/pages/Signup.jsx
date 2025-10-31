@@ -2,10 +2,14 @@ import{ useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { login } from '../features/auth/authSlice';
 
 
 function Signup() {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
+  const dispatch = useDispatch()
+
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -25,8 +29,8 @@ function Signup() {
     try {
       const { data } = await axios.post('http://localhost:3000/api/signup', {username, email, password}); // Change URL as needed
       // Save token & user on successful signup (auto login)
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      console.log(data)
+      dispatch(login(data))
       setUsername('');
       setEmail('');
       setPassword('');

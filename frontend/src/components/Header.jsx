@@ -1,16 +1,35 @@
-// Header.jsx
-import { Link } from "react-router-dom"
-import { useEffect, useState } from "react"
-import { Menu, X } from "lucide-react" // hamburger & close icon
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { logout } from "../features/auth/authSlice";
 
 function Header() {
-  const [token, setToken] = useState(null)
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const savedToken = localStorage.getItem("token")
-    setToken(savedToken)
-  }, [])
+  // ✅ Directly use Redux store for auth status
+  const token = useSelector((state) => state.auth.token);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login");
+  };
+
+  // 🌍 Define links for each user type
+  const guestLinks = [
+    { to: "/about", label: "About Us" },
+    { to: "/contact", label: "Contact" },
+  ];
+
+  const userLinks = [
+    { to: "/", label: "Home" },
+    { to: "/donate", label: "Donate" },
+    { to: "/find", label: "Find Donors" },
+  ];
+
+  const linksToShow = token ? userLinks : guestLinks;
 
   return (
     <header className="sticky top-0 bg-white border-b z-30">
@@ -23,21 +42,15 @@ function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="/" className="text-sm font-medium text-black hover:text-red-600">
-            Home
-          </Link>
-          <Link to="/donate" className="text-sm font-medium text-gray-600 hover:text-red-600">
-            Donate
-          </Link>
-          <Link to="/find" className="text-sm font-medium text-gray-600 hover:text-red-600">
-            Find Donors
-          </Link>
-          <Link to="/about" className="text-sm font-medium text-gray-600 hover:text-red-600">
-            About Us
-          </Link>
-          <Link to="/contact" className="text-sm font-medium text-gray-600 hover:text-red-600">
-            Contact
-          </Link>
+          {linksToShow.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="text-sm font-medium text-gray-700 hover:text-red-600"
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
         {/* Desktop Auth Buttons */}
@@ -47,20 +60,23 @@ function Header() {
               <Link to="/login" className="border px-3 py-1 rounded text-sm">
                 Login
               </Link>
-              <Link to="/signup" className="bg-red-600 text-white px-3 py-1 rounded text-sm">
+              <Link
+                to="/signup"
+                className="bg-red-600 text-white px-3 py-1 rounded text-sm"
+              >
                 Signup
               </Link>
             </>
           ) : (
             <>
-              <Link to="/profile" className="border px-3 py-1 rounded text-sm">
+              <Link
+                to="/profile"
+                className="border px-3 py-1 rounded text-sm"
+              >
                 Profile
               </Link>
               <button
-                onClick={() => {
-                  localStorage.removeItem("token")
-                  setToken(null)
-                }}
+                onClick={handleLogout}
                 className="bg-red-600 text-white px-3 py-1 rounded text-sm"
               >
                 Logout
@@ -69,7 +85,7 @@ function Header() {
           )}
         </div>
 
-        {/* Mobile Hamburger */}
+        {/* Mobile Menu Button */}
         <button
           className="md:hidden text-red-600"
           onClick={() => setIsOpen(!isOpen)}
@@ -81,43 +97,19 @@ function Header() {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden bg-white border-t px-4 py-3 space-y-3">
-          <Link
-            to="/"
-            className="block text-sm font-medium text-black hover:text-red-600"
-            onClick={() => setIsOpen(false)}
-          >
-            Home
-          </Link>
-          <Link
-            to="/donate"
-            className="block text-sm font-medium text-gray-600 hover:text-red-600"
-            onClick={() => setIsOpen(false)}
-          >
-            Donate
-          </Link>
-          <Link
-            to="/find"
-            className="block text-sm font-medium text-gray-600 hover:text-red-600"
-            onClick={() => setIsOpen(false)}
-          >
-            Find Donors
-          </Link>
-          <Link
-            to="/about"
-            className="block text-sm font-medium text-gray-600 hover:text-red-600"
-            onClick={() => setIsOpen(false)}
-          >
-            About Us
-          </Link>
-          <Link
-            to="/contact"
-            className="block text-sm font-medium text-gray-600 hover:text-red-600"
-            onClick={() => setIsOpen(false)}
-          >
-            Contact
-          </Link>
+          {/* Nav Links */}
+          {linksToShow.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="block text-sm font-medium text-gray-700 hover:text-red-600"
+              onClick={() => setIsOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
 
-          {/* Mobile Auth Buttons */}
+          {/* Auth Buttons */}
           <div className="flex flex-col gap-2 pt-3">
             {!token ? (
               <>
@@ -147,9 +139,8 @@ function Header() {
                 </Link>
                 <button
                   onClick={() => {
-                    localStorage.removeItem("token")
-                    setToken(null)
-                    setIsOpen(false)
+                    handleLogout();
+                    setIsOpen(false);
                   }}
                   className="bg-red-600 text-white px-3 py-1 rounded text-sm text-center"
                 >
@@ -161,7 +152,7 @@ function Header() {
         </div>
       )}
     </header>
-  )
+  );
 }
 
-export default Header
+export default Header;

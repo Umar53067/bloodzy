@@ -25,13 +25,8 @@ function Login() {
         { email, password }, // direct states bheje
        // { withCredentials: true }
       );
-
-      // Save token to localStorage (or Redux)
-      localStorage.setItem('token', data.token);
+      console.log(data)
       dispatch(login(data));
-
-      // Optionally save user info
-      localStorage.setItem('user', JSON.stringify(data.user));
 
       setLoading(false);
       navigate('/'); // redirect to home or dashboard
