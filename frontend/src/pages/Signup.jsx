@@ -27,7 +27,7 @@ function Signup() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('http://localhost:3000/api/signup', {username, email, password}); // Change URL as needed
+      const { data } = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/signup`, {username, email, password}); // Change URL as needed
       // Save token & user on successful signup (auto login)
       console.log(data)
       dispatch(login(data))

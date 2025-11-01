@@ -23,7 +23,7 @@ function Find() {
         const maxDistance = radiusKm * 1000
         const params = { lat, lng, maxDistance }
         if (bloodGroup) params.bloodGroup = bloodGroup
-        const { data } = await axios.get('http://localhost:3000/api/donors/nearby', { params })
+        const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/donors/nearby`, { params })
         setResults(data.donors || [])
         setMessage(data.donors?.length ? '' : 'No donors found in this radius')
       } catch (err) {

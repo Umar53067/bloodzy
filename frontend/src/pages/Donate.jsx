@@ -67,7 +67,7 @@ function Donate() {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:3000/api/donors/register",
+        `${import.meta.env.VITE_SERVER_URL}/api/donors/register`,
         {
           bloodGroup,
           age,

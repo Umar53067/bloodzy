@@ -40,8 +40,8 @@ function Profile() {
       setError("")
       try {
         const [meRes, donorRes] = await Promise.all([
-          axios.get("http://localhost:3000/api/me", { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get("http://localhost:3000/api/donors/me", { headers: { Authorization: `Bearer ${token}` } }).catch((e)=>e.response)
+          axios.get(`${import.meta.env.VITE_SERVER_URL}/api/me`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${import.meta.env.VITE_SERVER_URL}/api/donors/me`, { headers: { Authorization: `Bearer ${token}` } }).catch((e)=>e.response)
         ])
         if (!mounted) return
         setMe(meRes.data)
@@ -88,7 +88,7 @@ function Profile() {
     try {
       // if new geo captured, include it
       const payload = newLocation ? { ...form, location: newLocation } : form
-      const { data } = await axios.put("http://localhost:3000/api/donors/me", payload, { headers: { Authorization: `Bearer ${token}` } })
+      const { data } = await axios.put(`${import.meta.env.VITE_SERVER_URL}/api/donors/me`, payload, { headers: { Authorization: `Bearer ${token}` } })
       setDonor(data.donor)
       setSuccess("Profile updated")
     } catch (err) {
@@ -103,7 +103,7 @@ function Profile() {
     setError("")
     setSuccess("")
     try {
-      const { data } = await axios.put("http://localhost:3000/api/me", profileForm, { headers: { Authorization: `Bearer ${token}` } })
+      const { data } = await axios.put(`${import.meta.env.VITE_SERVER_URL}/api/me`, profileForm, { headers: { Authorization: `Bearer ${token}` } })
       setMe(data)
       setSuccess("Account details updated")
     } catch (err) {

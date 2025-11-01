@@ -21,7 +21,7 @@ function Login() {
 
     try {
       const { data } = await axios.post(
-        'http://localhost:3000/api/login',
+        `${import.meta.env.VITE_SERVER_URL}/api/login`,
         { email, password }, // direct states bheje
        // { withCredentials: true }
       );

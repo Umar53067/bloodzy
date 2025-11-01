@@ -25,7 +25,7 @@ function Contact() {
               <div>
                 <p className="font-semibold">Our Office</p>
                 <p className="text-gray-600">
-                  123 BloodConnect Street, Lahore, Pakistan
+                  Lahore, Pakistan
                 </p>
               </div>
             </li>

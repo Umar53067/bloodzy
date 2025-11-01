@@ -12,11 +12,6 @@ function About() {
             of lives by making blood accessible to everyone, everywhere.
           </p>
         </div>
-        <img
-          src="https://images.unsplash.com/photo-1607746882042-944635dfe10e?auto=format&fit=crop&w=1600&q=80"
-          alt="Blood donation"
-          className="absolute inset-0 w-full h-full object-cover opacity-20"
-        />
       </section>
 
       {/* Mission Section */}
@@ -101,13 +96,6 @@ function About() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t bg-gray-100 text-sm text-gray-600">
-        <div className="container mx-auto px-4 py-6 text-center">
-          <p>&copy; {new Date().getFullYear()} Bloodzy. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   )
 }

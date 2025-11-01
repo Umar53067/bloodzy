@@ -49,7 +49,7 @@ function HomePage() {
 
         try {
           setMessage("Fetching nearby donors...");
-          const { data } = await axios.get("http://localhost:3000/api/donors/nearby", {
+          const { data } = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/donors/nearby`, {
             params: {
               lat,
               lng,
