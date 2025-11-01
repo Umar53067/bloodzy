@@ -57,20 +57,56 @@ bloodzy/
 
 ### Step 1: Clone the repo
 
+```bash
 git clone https://github.com/yourusername/bloodzy.git
 cd bloodzy
+```
 
 ### Step 2: Backend Setup
+
+```bash
 cd backend
 npm install
-touch .env
-# Add Mongo URI and other environment variables
+cp .env.example .env
+# Edit .env with your MongoDB URI and other configuration
 npm run dev
+```
 
 ### Step 3: Frontend Setup
+
+```bash
 cd ../frontend
 npm install
-npm start
+cp .env.example .env
+# Edit .env with your backend URL
+npm run dev
+```
+
+### Step 4: Environment Variables
+
+**Backend (.env):**
+```env
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+CLIENT_URL=http://localhost:5173
+# ... see backend/.env.example for all variables
+```
+
+**Frontend (.env):**
+```env
+VITE_SERVER_URL=http://localhost:3000
+```
+
+---
+
+## 🚀 Deployment
+
+For deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)
+
+**Quick Summary:**
+- **Frontend**: Deploy to Vercel
+- **Backend**: Deploy to Render
+- **Database**: Use MongoDB Atlas
 
 🧪 API Routes (Sample)
 GET /api/donors/nearby?lat=33.6844&lng=73.0551&radius=5

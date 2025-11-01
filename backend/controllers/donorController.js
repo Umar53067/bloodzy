@@ -66,6 +66,7 @@ export const findNearbyDonors = async (req, res) => {
           $maxDistance: parseInt(maxDistance), // meters
         },
       },
+      available: true, // Only show available donors
     };
 
     // Optional filter by blood group

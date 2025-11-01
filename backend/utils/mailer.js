@@ -1,43 +1,44 @@
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
+dotenv.config();
 
+// Configure transporter based on environment
+let transporter;
 
-// const transporter = nodemailer.createTransport({
-//   host: "sandbox.smtp.mailtrap.io",
-//   port: 2525,
-//   secure: false, 
-//   auth: {
-//     user: process.env.MAILTRAP_USER,
-//     pass: process.env.MAILTRAP_PASS,
-//   },
-//     auth: "LOGIN", // 👈 force LOGIN instead of PLAIN
-// });
-
-// Looking to send emails in production? Check out our Email API/SMTP product!
-var transporter = nodemailer.createTransport({
-  host: "sandbox.smtp.mailtrap.io",
-  port: 2525,
-  auth: {
-    user: "0c8d89f2462cea",
-    pass: "3ef67932ac06c2"
-  }
-});
+if (process.env.NODE_ENV === "production") {
+  // Production email configuration (use your production email service)
+  transporter = nodemailer.createTransport({
+    service: process.env.EMAIL_SERVICE || "gmail", // e.g., 'gmail', 'sendgrid', etc.
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+} else {
+  // Development email configuration (Mailtrap or similar)
+  transporter = nodemailer.createTransport({
+    host: process.env.MAILTRAP_HOST || "sandbox.smtp.mailtrap.io",
+    port: process.env.MAILTRAP_PORT || 2525,
+    auth: {
+      user: process.env.MAILTRAP_USER,
+      pass: process.env.MAILTRAP_PASS,
+    },
+  });
+}
 
 export const sendEmail = async ({ to, subject, text, html }) => {
-            
-
-   transporter.verify((error, success) => {
-  if (error) {
-    console.error("SMTP connection error:", error);
-  } else {
-    console.log("SMTP server is ready to send messages ✅");
-  }
-});
-         
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error("SMTP connection error:", error);
+    } else {
+      console.log("SMTP server is ready to send messages ✅");
+    }
+  });
 
   try {
     const info = await transporter.sendMail({
-      from: '"MyApp Support" <no-reply@bloodzy.com>', // Send
+      from: process.env.EMAIL_FROM || '"Bloodzy Support" <no-reply@bloodzy.com>',
       to,
       subject,
       text,
