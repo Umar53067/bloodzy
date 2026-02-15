@@ -42,6 +42,7 @@ function Header() {
     { to: "/", label: "Home" },
     { to: "/donate", label: "Donate" },
     { to: "/find", label: "Find Donors" },
+    { to: "/hospitals", label: "Hospitals" },
   ];
 
   const linksToShow = token ? userLinks : guestLinks;

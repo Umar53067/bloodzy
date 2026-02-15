@@ -7,10 +7,11 @@ import Button from "../components/Button"
 import AlertMessage from "../components/AlertMessage"
 import { BLOOD_TYPES, GENDERS, TYPOGRAPHY } from "../constants"
 import { useDonor } from "../hooks/useDonor"
+import { updateUserProfile } from "../lib/authService"
 
 function Profile() {
   const { token, user: authUser } = useSelector((s) => s.auth)
-  const { getDonor } = useDonor()
+  const { getDonor, updateDonor } = useDonor()
   const [me, setMe] = useState(null)
   const [donor, setDonor] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -111,12 +112,32 @@ function Profile() {
     setError("")
     setSuccess("")
     try {
-      // Mock save - API removed
-      await new Promise(resolve => setTimeout(resolve, 800))
-      setSuccess("Donor profile updated")
+      if (!donor?.id) {
+        setError("Donor profile not found")
+        setSaving(false)
+        return
+      }
+
+      // Update donor in Supabase
+      const { data, error: updateError } = await updateDonor(donor.id, {
+        blood_group: form.bloodGroup,
+        age: parseInt(form.age),
+        gender: form.gender,
+        phone: form.phone,
+        city: form.city,
+        available: form.available,
+      })
+
+      if (updateError) {
+        setError(updateError)
+        setSaving(false)
+        return
+      }
+
+      setSuccess("Donor profile updated successfully!")
       setTimeout(() => setSuccess(""), 3000)
     } catch (err) {
-      setError("Update failed. Please try again.")
+      setError(err.message || "Update failed. Please try again.")
     } finally {
       setSaving(false)
     }
@@ -127,12 +148,20 @@ function Profile() {
     setError("")
     setSuccess("")
     try {
-      // Mock save - API removed
-      await new Promise(resolve => setTimeout(resolve, 800))
-      setSuccess("Account details updated")
+      // Update user profile metadata in Supabase Auth
+      const { user, error: updateError } = await updateUserProfile({
+        username: profileForm.username,
+      })
+
+      if (updateError) {
+        setError(updateError)
+        return
+      }
+
+      setSuccess("Account details updated successfully!")
       setTimeout(() => setSuccess(""), 3000)
     } catch (err) {
-      setError("Update failed. Please try again.")
+      setError(err.message || "Update failed. Please try again.")
     }
   }
 
@@ -195,53 +224,55 @@ function Profile() {
             />
           )}
 
-          {/* Account Details Section */}
-          <div className="mb-8 pb-8 border-b">
-            <h3 className={`${TYPOGRAPHY.h3} text-gray-900 mb-6`}>Account Details</h3>
-            <form onSubmit={handleProfileSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormInput
-                id="username"
-                name="username"
-                type="text"
-                label="Username"
-                value={profileForm.username}
-                onChange={handleProfileChange}
-              />
-              <FormInput
-                id="email"
-                name="email"
-                type="email"
-                label="Email Address"
-                value={profileForm.email}
-                onChange={handleProfileChange}
-                autoComplete="email"
-              />
-              <div className="md:col-span-2 flex justify-end">
-                <Button 
-                  type="submit" 
-                  variant="primary"
-                  loading={saving}
-                >
-                  {saving ? "Saving..." : "Save Account Details"}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Account Details Section */}
+            <div className="pb-8 lg:border-r lg:pr-8">
+              <h3 className={`${TYPOGRAPHY.h3} text-gray-900 mb-6`}>Account Details</h3>
+              <form onSubmit={handleProfileSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormInput
+                  id="username"
+                  name="username"
+                  type="text"
+                  label="Username"
+                  value={profileForm.username}
+                  onChange={handleProfileChange}
+                />
+                <FormInput
+                  id="email"
+                  name="email"
+                  type="email"
+                  label="Email Address"
+                  value={profileForm.email}
+                  onChange={handleProfileChange}
+                  autoComplete="email"
+                />
+                <div className="md:col-span-2 flex justify-end">
+                  <Button 
+                    type="submit" 
+                    variant="primary"
+                    loading={saving}
+                  >
+                    {saving ? "Saving..." : "Save Account Details"}
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            {/* Donor Section */}
+            <div>
+            {!donor ? (
+              <div className="text-center py-12 bg-red-50 rounded-lg border-2 border-red-200">
+                <p className={`${TYPOGRAPHY.body} text-gray-700 mb-6 italic max-w-md mx-auto`}>
+                  "Your blood can save a life today. Be the reason someone smiles again."
+                </p>
+                <Button variant="primary" size="lg">
+                  <Link to="/donate" className="text-white">Register as Donor</Link>
                 </Button>
               </div>
-            </form>
-          </div>
-
-          {/* Donor Section */}
-          {!donor ? (
-            <div className="text-center py-12 bg-red-50 rounded-lg border-2 border-red-200">
-              <p className={`${TYPOGRAPHY.body} text-gray-700 mb-6 italic max-w-md mx-auto`}>
-                "Your blood can save a life today. Be the reason someone smiles again."
-              </p>
-              <Button variant="primary" size="lg">
-                <Link to="/donate" className="text-white">Register as Donor</Link>
-              </Button>
-            </div>
-          ) : (
-            <>
-              <h3 className={`${TYPOGRAPHY.h3} text-gray-900 mb-6`}>Donor Information</h3>
-              <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            ) : (
+              <>
+                <h3 className={`${TYPOGRAPHY.h3} text-gray-900 mb-6`}>Donor Information</h3>
+                <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormSelect
                   id="bloodGroup"
                   name="bloodGroup"
@@ -312,8 +343,10 @@ function Profile() {
                 </div>
               </form>
             </>
-          )}
+            )}
+          </div>
         </div>
+      </div>
       </div>
     </div>
   )

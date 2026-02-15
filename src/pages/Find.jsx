@@ -30,8 +30,8 @@ function Find() {
   };
 
   /**
-   * Dynamic radius expansion: tries multiple radius values if no donors found
-   * Expands: 5km → 10km → 15km → 20km → 50km
+   * Search for donors: retrieves all donors matching blood group and city
+   * Shows multiple donors from the same location
    */
   const handleSearch = async () => {
     if (!validateForm()) {
@@ -43,33 +43,33 @@ function Find() {
     setMessage('Searching for donors...');
     setRadiusHistory([]);
     let foundDonors = [];
-    const radiusSteps = [5, 10, 15, 20, 50];
 
     try {
-      for (const currentRadius of radiusSteps) {
-        setMessage(`Searching within ${currentRadius}km...`);
-        setRadiusHistory((prev) => [...prev, currentRadius]);
+      // Search Supabase for ALL donors with matching blood group and city
+      // This will return multiple donors from the same location
+      const { data, error } = await searchNearbyDonors(bloodGroup, city, 500);
 
-        // Search Supabase for donors with matching blood group and city
-        const { data, error } = await searchNearbyDonors(bloodGroup, city, 50);
-
-        if (error) {
-          console.error(`Error at ${currentRadius}km radius:`, error);
-          continue;
-        }
-
-        if (data && data.length > 0) {
-          foundDonors = data;
-          setMessage(
-            `✓ Found ${data.length} donor${data.length !== 1 ? 's' : ''} within ${currentRadius}km`
-          );
-          break; // Stop expanding if we found donors
-        }
+      if (error) {
+        console.error('Error searching donors:', error);
+        const errorMsg = error.includes('RLS')
+          ? 'Access denied: Check database permissions'
+          : error;
+        setMessage(`Error searching donors: ${errorMsg}`);
+        setDonors([]);
+        setLoading(false);
+        return;
       }
 
-      if (foundDonors.length === 0) {
+      console.log('Search results:', { bloodGroup, city, count: data?.length || 0 });
+
+      if (data && data.length > 0) {
+        foundDonors = data;
         setMessage(
-          'No donors found within 50km. Please try a different city or blood group.'
+          `✓ Found ${data.length} donor${data.length !== 1 ? 's' : ''} matching your criteria`
+        );
+      } else {
+        setMessage(
+          `No donors found for ${bloodGroup} blood type in ${city}. Try a different city or blood group.`
         );
         setDonors([]);
         setLoading(false);

@@ -7,11 +7,12 @@ import Button from "../components/Button";
 import AlertMessage from "../components/AlertMessage";
 import { BLOOD_TYPES, GENDERS, SPACING, TYPOGRAPHY } from "../constants";
 import { useDonor } from "../hooks/useDonor";
+import { CheckCircle, Edit3 } from "lucide-react";
 
 function Donate() {
   const navigate = useNavigate();
   const { token, user } = useSelector((state) => state.auth);
-  const { createDonor, loading: donorLoading } = useDonor();
+  const { createDonor, getDonor, loading: donorLoading } = useDonor();
 
   // Form fields
   const [bloodGroup, setBloodGroup] = useState("");
@@ -28,13 +29,42 @@ function Donate() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [errors, setErrors] = useState({});
+  
+  // Check if already a donor
+  const [isAlreadyDonor, setIsAlreadyDonor] = useState(false);
+  const [checkingDonorStatus, setCheckingDonorStatus] = useState(true);
+  const [existingDonor, setExistingDonor] = useState(null);
 
+  // Check if user is already a donor
   useEffect(() => {
     if (!token) {
       navigate("/login");
       return;
     }
-  }, [navigate, token]);
+
+    const checkDonorStatus = async () => {
+      try {
+        setCheckingDonorStatus(true);
+        if (!user || !user.id) {
+          setCheckingDonorStatus(false);
+          return;
+        }
+
+        const { data, error: donorError } = await getDonor(user.id);
+        
+        if (!donorError && data) {
+          setIsAlreadyDonor(true);
+          setExistingDonor(data);
+        }
+      } catch (err) {
+        console.error("Error checking donor status:", err);
+      } finally {
+        setCheckingDonorStatus(false);
+      }
+    };
+
+    checkDonorStatus();
+  }, [token, user, getDonor, navigate]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -148,31 +178,113 @@ function Donate() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center px-4 py-10">
-      <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-lg">
-        <h2 className={`${TYPOGRAPHY.h2} text-center text-red-600 mb-2`}>
-          Become a Blood Donor
-        </h2>
-        <p className={`${TYPOGRAPHY.body} text-center text-gray-600 mb-8`}>
-          Fill out the form below to register as a blood donor and help save lives.
-        </p>
+      {/* Loading State */}
+      {checkingDonorStatus ? (
+        <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-lg text-center">
+          <p className="text-gray-600">Checking your donor status...</p>
+        </div>
+      ) : isAlreadyDonor && existingDonor ? (
+        <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-lg">
+          {/* ALREADY A DONOR - Show Update UI */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <CheckCircle size={64} className="text-green-500" />
+            </div>
+            <h2 className={`${TYPOGRAPHY.h2} text-green-600 mb-2`}>
+              You're Already a Donor! ✅
+            </h2>
+            <p className={`${TYPOGRAPHY.body} text-gray-600`}>
+              Thank you for being part of our lifesaving community!
+            </p>
+          </div>
 
-        {error && (
-          <AlertMessage
-            type="error"
-            message={error}
-            onClose={() => setError("")}
-          />
-        )}
-        
-        {success && (
-          <AlertMessage
-            type="success"
-            message={success}
-            onClose={() => setSuccess("")}
-          />
-        )}
+          {/* Existing Donor Info Preview */}
+          <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6 mb-6">
+            <h3 className="font-bold text-gray-900 mb-4">Your Current Information:</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Blood Group:</span>
+                <span className="font-bold text-red-600 text-lg">{existingDonor.blood_group || "N/A"}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Age:</span>
+                <span className="font-semibold text-gray-900">{existingDonor.age || "N/A"} years</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Gender:</span>
+                <span className="font-semibold text-gray-900">{existingDonor.gender || "N/A"}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Phone:</span>
+                <span className="font-semibold text-gray-900">{existingDonor.phone || "N/A"}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">City:</span>
+                <span className="font-semibold text-gray-900">{existingDonor.city || "N/A"}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-600">Status:</span>
+                <span className={`font-semibold ${existingDonor.available ? "text-green-600" : "text-orange-600"}`}>
+                  {existingDonor.available ? "✓ Available" : "⚠️ Unavailable"}
+                </span>
+              </div>
+            </div>
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            <Button
+              variant="primary"
+              fullWidth
+              size="lg"
+              onClick={() => navigate("/profile")}
+              className="flex items-center justify-center gap-2"
+            >
+              <Edit3 size={20} />
+              Update Your Information
+            </Button>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => navigate("/")}
+            >
+              Back to Home
+            </Button>
+          </div>
+
+          {/* Additional Info */}
+          <p className="text-sm text-gray-500 text-center mt-6">
+            Want to update your blood type, location, or availability status? <br />
+            Click the "Update" button above to manage your donor profile.
+          </p>
+        </div>
+      ) : (
+        <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-lg">
+          {/* NEW DONOR - Show Registration Form */}
+          <h2 className={`${TYPOGRAPHY.h2} text-center text-red-600 mb-2`}>
+            Become a Blood Donor
+          </h2>
+          <p className={`${TYPOGRAPHY.body} text-center text-gray-600 mb-8`}>
+            Fill out the form below to register as a blood donor and help save lives.
+          </p>
+
+          {error && (
+            <AlertMessage
+              type="error"
+              message={error}
+              onClose={() => setError("")}
+            />
+          )}
+          
+          {success && (
+            <AlertMessage
+              type="success"
+              message={success}
+              onClose={() => setSuccess("")}
+            />
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <FormSelect
             id="bloodGroup"
             name="bloodGroup"
@@ -184,7 +296,7 @@ function Donate() {
             error={errors.bloodGroup}
           />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormInput
               id="age"
               name="age"
@@ -281,6 +393,7 @@ function Donate() {
           </Button>
         </form>
       </div>
+      )}
     </div>
   );
 }

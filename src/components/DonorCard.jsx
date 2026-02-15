@@ -15,6 +15,12 @@ function DonorCard({ donor, onViewDetails = null, onContact = null }) {
         <div>
           <h3 className="font-bold text-lg text-gray-900">{donor.name}</h3>
           <p className="text-sm text-gray-600">{donor.city}</p>
+          {donor.available === false && (
+            <p className="text-xs text-orange-600 font-semibold mt-1">⚠️ Currently Unavailable</p>
+          )}
+          {donor.available && (
+            <p className="text-xs text-green-600 font-semibold mt-1">✓ Available</p>
+          )}
         </div>
         <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full font-bold text-sm">
           {donor.bloodGroup}

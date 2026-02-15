@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { Search, Phone, Clock, MapPin, Droplets, Shield, Heart } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { useDonor } from "../hooks/useDonor";
 
 // Fix default marker icons (Leaflet issue in React)
 delete L.Icon.Default.prototype._getIconUrl;
@@ -22,47 +23,240 @@ function MapUpdater({ center }) {
 
 function Homepage() {
   const [bloodGroup, setBloodGroup] = useState("");
+  const [city, setCity] = useState("");
   const [radiusKm, setRadiusKm] = useState(5);
   const [donors, setDonors] = useState([]);
   const [selectedDonor, setSelectedDonor] = useState(null);
   const [mapCenter, setMapCenter] = useState([20.5937, 78.9629]); // default center (India)
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [seekerLocation, setSeekerLocation] = useState(null); // Add seeker location state
+  const [geoLoading, setGeoLoading] = useState(true); // Track geolocation loading
+  const { searchNearbyDonors } = useDonor();
 
-  // 📍 Get user's location & fetch nearby donors
-  const handleSearch = () => {
-    setLoading(true);
-    setMessage("Getting your location...");
+  /**
+   * Calculate distance between two coordinates using Haversine formula
+   */
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
 
-    if (!navigator.geolocation) {
-      setMessage("❌ Geolocation not supported by your browser.");
-      setLoading(false);
+  /**
+   * Extract coordinates from donor location object (handles multiple formats)
+   */
+  const extractCoordinates = (location) => {
+    if (!location) {
+      console.warn('❌ Location is null/undefined');
+      return null;
+    }
+    
+    console.log('📍 Extracting coordinates from location:', location);
+    
+    // Handle if location is a string (JSON stringified)
+    if (typeof location === 'string') {
+      try {
+        location = JSON.parse(location);
+        console.log('✓ Parsed location from string:', location);
+      } catch (e) {
+        console.error('❌ Failed to parse location string:', e);
+        return null;
+      }
+    }
+
+    // GeoJSON format: {type: "Point", coordinates: [lng, lat]}
+    if (location.type === 'Point' && location.coordinates && Array.isArray(location.coordinates)) {
+      const [lng, lat] = location.coordinates;
+      if (typeof lng === 'number' && typeof lat === 'number' && isFinite(lng) && isFinite(lat)) {
+        console.log('✓ GeoJSON format detected:', { lat, lng });
+        return { lat, lng };
+      }
+    }
+    
+    // GeoJSON coordinates without type field
+    if (location.coordinates && Array.isArray(location.coordinates)) {
+      const [lng, lat] = location.coordinates;
+      if (typeof lng === 'number' && typeof lat === 'number' && isFinite(lng) && isFinite(lat)) {
+        console.log('✓ Coordinates array detected:', { lat, lng });
+        return { lat, lng };
+      }
+    }
+    
+    // Direct format: {lat: x, lng: y}
+    if (location.lat !== undefined && location.lng !== undefined) {
+      const lat = parseFloat(location.lat);
+      const lng = parseFloat(location.lng);
+      if (isFinite(lat) && isFinite(lng)) {
+        console.log('✓ lat/lng format detected:', { lat, lng });
+        return { lat, lng };
+      }
+    }
+    
+    // Alternative format: {latitude: x, longitude: y}
+    if (location.latitude !== undefined && location.longitude !== undefined) {
+      const lat = parseFloat(location.latitude);
+      const lng = parseFloat(location.longitude);
+      if (isFinite(lat) && isFinite(lng)) {
+        console.log('✓ latitude/longitude format detected:', { lat, lng });
+        return { lat, lng };
+      }
+    }
+    
+    console.warn('⚠️ Could not extract coordinates from:', location);
+    return null;
+  };
+
+  /**
+   * Get seeker's location on page load
+   */
+  useEffect(() => {
+    setGeoLoading(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setSeekerLocation({ lat: latitude, lng: longitude });
+          setMapCenter([latitude, longitude]);
+          console.log('✓ Seeker location captured:', { latitude, longitude });
+          setGeoLoading(false);
+        },
+        (error) => {
+          console.warn('⚠️ Geolocation error:', error.message);
+          setMessage('Geolocation failed. Using default location.');
+          setSeekerLocation(null);
+          setGeoLoading(false);
+        }
+      );
+    } else {
+      setMessage('Geolocation not supported');
+      setGeoLoading(false);
+    }
+  }, []);
+
+  // 📍 Search for nearby donors - using Find page approach
+  const handleSearch = async () => {
+    // Validate inputs
+    if (!bloodGroup && !city) {
+      setMessage('⚠️ Please enter at least a Blood Group or City to search');
+      setDonors([]);
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        setMapCenter([lat, lng]);
+    setLoading(true);
+    setMessage("Searching for donors...");
 
-        try {
-          setMessage("Mock data: Nearby donors loaded");
-          // API call removed - mock data used instead
-          setDonors([]);
-        } catch (err) {
-          console.error(err);
-          setMessage("⚠️ Failed to fetch donors. Please try again.");
-        } finally {
-          setLoading(false);
-        }
-      },
-      (error) => {
-        console.error(error);
-        setMessage("❌ Unable to access location. Please allow permission.");
+    try {
+      // Search Supabase for ALL donors matching blood group and city
+      const { data, error } = await searchNearbyDonors(bloodGroup || null, city || null, 500);
+
+      if (error) {
+        console.error('❌ Error searching donors:', error);
+        const errorMsg = error.includes('RLS')
+          ? 'Access denied: Check database permissions'
+          : error;
+        setMessage(`Error searching donors: ${errorMsg}`);
+        setDonors([]);
         setLoading(false);
+        return;
       }
-    );
+
+      console.log('📊 Raw search results from API:', { count: data?.length || 0, data });
+
+      if (data && data.length > 0) {
+        // Transform Supabase data with proper coordinate extraction and distance calculation
+        const transformedDonors = [];
+        const skippedDonors = [];
+        
+        data.forEach((donor) => {
+          // Extract coordinates properly
+          const coords = extractCoordinates(donor.location);
+          
+          if (!coords) {
+            console.warn(`⚠️ Skipping donor ${donor.id} (${donor.user?.username || 'Unknown'}) - Invalid location:`, donor.location);
+            skippedDonors.push({
+              id: donor.id,
+              name: donor.user?.username,
+              reason: 'Invalid location coordinates'
+            });
+            return;
+          }
+
+          // Calculate distance if seeker location is available
+          let distance = 'Unknown';
+          if (seekerLocation) {
+            const distKm = calculateDistance(
+              seekerLocation.lat,
+              seekerLocation.lng,
+              coords.lat,
+              coords.lng
+            );
+            distance = `${distKm.toFixed(1)} km`;
+          }
+
+          const transformed = {
+            id: donor.id,
+            name: donor.user?.username || 'Anonymous Donor',
+            bloodGroup: donor.blood_group,
+            age: donor.age,
+            gender: donor.gender,
+            phone: donor.phone,
+            city: donor.city,
+            available: donor.available,
+            distance,
+            email: donor.user?.email,
+            location: {
+              coordinates: [coords.lng, coords.lat]
+            }
+          };
+          
+          transformedDonors.push(transformed);
+        });
+
+        console.log(`✓ Successfully transformed ${transformedDonors.length} donors`);
+        if (skippedDonors.length > 0) {
+          console.warn(`⚠️ Skipped ${skippedDonors.length} donors due to invalid locations:`, skippedDonors);
+        }
+        console.log(`📍 Ready to display ${transformedDonors.length} donors on map`);
+
+        if (transformedDonors.length === 0) {
+          setMessage(`❌ Found ${data.length} match(es) but none have valid location data. Ask donors to complete their profile location.`);
+          setDonors([]);
+        } else {
+          setMessage(
+            `✓ Found ${transformedDonors.length} donor${transformedDonors.length !== 1 ? 's' : ''} with valid locations matching your criteria`
+          );
+          setDonors(transformedDonors);
+
+          // Center map on first donor if available
+          if (transformedDonors[0]?.location?.coordinates) {
+            const [lng, lat] = transformedDonors[0].location.coordinates;
+            setMapCenter([lat, lng]);
+            console.log('🗺️ Map centered on first donor:', { lat, lng });
+          }
+        }
+      } else {
+        const searchCriteria = bloodGroup && city ? `${bloodGroup} blood type in ${city}` : bloodGroup ? `${bloodGroup} blood type` : 'donors';
+        setMessage(
+          `No ${searchCriteria} found in the database. Try registering as a donor first!`
+        );
+        setDonors([]);
+      }
+    } catch (err) {
+      console.error('❌ Search error:', err);
+      setMessage(`Error searching donors: ${err.message}`);
+      setDonors([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDonorSelect = (donor) => {
@@ -85,7 +279,7 @@ function Homepage() {
           <h1 className="text-5xl md:text-6xl font-bold mb-4 leading-tight">Find Blood Donors Near You</h1>
           <p className="text-xl text-red-100 max-w-2xl mx-auto mb-8">Connect with verified donors in your area. Save lives in minutes, not hours.</p>
 
-          <div className="mt-8 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 px-4 mb-4">
+          <div className="mt-8 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 mb-4">
             <div>
               <label className="block text-left text-red-100 text-sm font-medium mb-2">Blood Group</label>
               <select value={bloodGroup} onChange={(e)=>setBloodGroup(e.target.value)} className="w-full px-4 py-3 rounded-lg border-0 text-gray-900 bg-white shadow-lg focus:ring-2 focus:ring-red-300 font-medium">
@@ -94,6 +288,16 @@ function Homepage() {
                   <option key={bg} value={bg}>{bg}</option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label className="block text-left text-red-100 text-sm font-medium mb-2">City</label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e)=>setCity(e.target.value)}
+                placeholder="Enter city name"
+                className="w-full px-4 py-3 rounded-lg border-0 text-gray-900 bg-white shadow-lg focus:ring-2 focus:ring-red-300 font-medium"
+              />
             </div>
             <div>
               <label className="block text-left text-red-100 text-sm font-medium mb-2">Search Radius</label>
@@ -166,16 +370,16 @@ function Homepage() {
           ) : (
             donors.map((donor) => (
               <div
-                key={donor._id}
+                key={donor.id}
                 onClick={() => handleDonorSelect(donor)}
                 className={`p-4 border rounded-lg cursor-pointer hover:shadow-md transition ${
-                  selectedDonor?._id === donor._id
+                  selectedDonor?.id === donor.id
                     ? "border-red-600"
                     : "border-gray-200"
                 }`}
               >
                 <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold">{donor.user?.username || "Donor"}</h2>
+                  <h2 className="text-lg font-semibold">{donor.name || "Donor"}</h2>
                   <span
                     className={`px-2 py-1 rounded text-sm font-medium ${
                       donor.available
@@ -192,11 +396,8 @@ function Homepage() {
                 <p className="text-sm text-gray-600">
                   City: {donor.city}
                 </p>
-                <p className="flex items-center text-sm text-gray-600 gap-1">
-                  <Clock size={14} /> Last Donation:{" "}
-                  {donor.lastDonation
-                    ? new Date(donor.lastDonation).toLocaleDateString()
-                    : "N/A"}
+                <p className="text-sm text-gray-600">
+                  Distance: {donor.distance}
                 </p>
                 <p className="flex items-center text-sm text-gray-600 gap-1">
                   <Phone size={14} /> {donor.phone}
@@ -224,25 +425,61 @@ function Homepage() {
             </Marker>
 
             {/* Donor Markers */}
-            {donors.map((donor) => (
-              <Marker
-                key={donor._id}
-                position={[
-                  donor.location.coordinates[1],
-                  donor.location.coordinates[0],
-                ]}
+            {donors.length > 0 && donors.map((donor) => {
+              if (!donor.location || !donor.location.coordinates) {
+                console.warn(`⚠️ Skipping donor ${donor.id} - no valid coordinates`);
+                return null;
+              }
+              const lat = donor.location.coordinates[1];
+              const lng = donor.location.coordinates[0];
+              
+              if (isNaN(lat) || isNaN(lng)) {
+                console.warn(`⚠️ Skipping donor ${donor.id} - invalid coordinates:`, { lat, lng });
+                return null;
+              }
+              
+              console.log(`✓ Rendering marker for ${donor.name}:`, { lat, lng });
+              
+              return (
+                <Marker
+                  key={donor.id}
+                  position={[lat, lng]}
+                  title={donor.name}
+                >
+                  <Popup>
+                    <div className="min-w-[200px]">
+                      <strong>{donor.name}</strong>
+                      <br />
+                      <span className="text-red-600 font-semibold">Blood Group: {donor.bloodGroup}</span>
+                      <br />
+                      City: {donor.city}
+                      <br />
+                      Distance: <span className="font-semibold text-green-600">{donor.distance}</span>
+                      <br />
+                      Phone: {donor.phone}
+                      <br />
+                      Status: {donor.available ? <span className="text-green-600">✓ Available</span> : <span className="text-orange-600">⚠️ Unavailable</span>}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+            
+            {/* Seeker Location Marker (if available) */}
+            {seekerLocation && (
+              <Marker 
+                position={[seekerLocation.lat, seekerLocation.lng]}
+                title="Your Location"
               >
                 <Popup>
-                  <strong>{donor.user?.username || "Donor"}</strong>
+                  <strong>📍 Your Location</strong>
                   <br />
-                  Blood Group: {donor.bloodGroup}
+                  Lat: {seekerLocation.lat.toFixed(4)}
                   <br />
-                  Phone: {donor.phone}
-                  <br />
-                  City: {donor.city}
+                  Lng: {seekerLocation.lng.toFixed(4)}
                 </Popup>
               </Marker>
-            ))}
+            )}
           </MapContainer>
         </div>
       </main>
