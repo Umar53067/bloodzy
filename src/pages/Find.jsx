@@ -192,14 +192,15 @@ function Find() {
 
           // Calculate distance if seeker location is available
           let distance = 'Unknown';
+          let distanceKm = null;
           if (seekerLocation) {
-            const distKm = calculateDistance(
+            distanceKm = calculateDistance(
               seekerLocation.lat,
               seekerLocation.lng,
               coords.lat,
               coords.lng
             );
-            distance = `${distKm.toFixed(1)} km`;
+            distance = `${distanceKm.toFixed(1)} km`;
           }
 
           const transformed = {
@@ -211,6 +212,7 @@ function Find() {
             city: donor.city,
             available: donor.available,
             distance,
+            distanceKm,
             location: {
               coordinates: [coords.lng, coords.lat]
             }
@@ -219,24 +221,37 @@ function Find() {
           transformedDonors.push(transformed);
         });
 
+        const radiusFilteredDonors = seekerLocation
+          ? transformedDonors.filter(
+              (donor) => donor.distanceKm != null && donor.distanceKm <= radiusKm
+            )
+          : transformedDonors;
+
         console.log(`✓ Successfully transformed ${transformedDonors.length} donors`);
         if (skippedDonors.length > 0) {
           console.warn(`⚠️ Skipped ${skippedDonors.length} donors due to invalid locations:`, skippedDonors);
         }
-        console.log(`📍 Ready to display ${transformedDonors.length} donors on map`);
+        console.log(`📍 Ready to display ${radiusFilteredDonors.length} donors on map`);
 
-        if (transformedDonors.length === 0) {
-          setMessage(`❌ Found ${data.length} match(es) but none have valid location data. Ask donors to complete their profile location.`);
+        if (radiusFilteredDonors.length === 0) {
+          const noLocationCount = transformedDonors.length === 0;
+          setMessage(
+            noLocationCount
+              ? `❌ Found ${data.length} match(es) but none have valid location data. Ask donors to complete their profile location.`
+              : `❌ Found matches, but none are within ${radiusKm} km of your location.`
+          );
           setDonors([]);
         } else {
           setMessage(
-            `✓ Found ${transformedDonors.length} donor${transformedDonors.length !== 1 ? 's' : ''} with valid locations matching your criteria`
+            seekerLocation
+              ? `✓ Found ${radiusFilteredDonors.length} donor${radiusFilteredDonors.length !== 1 ? 's' : ''} within ${radiusKm} km matching your criteria`
+              : `✓ Found ${radiusFilteredDonors.length} donor${radiusFilteredDonors.length !== 1 ? 's' : ''} with valid locations matching your criteria`
           );
-          setDonors(transformedDonors);
+          setDonors(radiusFilteredDonors);
 
           // Center map on first donor if available
-          if (transformedDonors[0]?.location?.coordinates) {
-            const [lng, lat] = transformedDonors[0].location.coordinates;
+          if (radiusFilteredDonors[0]?.location?.coordinates) {
+            const [lng, lat] = radiusFilteredDonors[0].location.coordinates;
             setMapCenter([lat, lng]);
             console.log('🗺️ Map centered on first donor:', { lat, lng });
           }
@@ -308,16 +323,16 @@ function Find() {
             <div className="flex items-end">
               <button
                 onClick={handleSearch}
-                disabled={loading}
+                disabled={loading || geoLoading}
                 className={`w-full px-6 py-3 bg-white text-red-600 rounded-lg font-bold text-lg transition-all transform ${
-                  loading 
+                  loading || geoLoading
                     ? "opacity-75 cursor-not-allowed" 
                     : "hover:bg-red-50 hover:shadow-xl hover:scale-105 active:scale-95"
                 }`}
               >
                 <span className="flex items-center justify-center gap-2">
                   <Search size={20} />
-                  {loading ? "Searching..." : "Search Now"}
+                  {loading ? "Searching..." : geoLoading ? "Locating..." : "Search Now"}
                 </span>
               </button>
             </div>
@@ -414,13 +429,6 @@ function Find() {
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <MapUpdater center={mapCenter} />
-
-            {/* Current user location marker */}
-            <Marker position={mapCenter}>
-              <Popup>
-                <strong>Your Location</strong>
-              </Popup>
-            </Marker>
 
             {/* Donor Markers */}
             {donors.length > 0 && donors.map((donor) => {

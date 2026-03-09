@@ -21,7 +21,6 @@ import {
   LogOut,
   TrendingUp,
   Activity,
-  FileText,
 } from "lucide-react";
 import StatsCard from "../components/StatsCard";
 import { logout } from "../features/auth/authSlice";

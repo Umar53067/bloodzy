@@ -22,14 +22,14 @@ function FormInput({
   autoComplete,
 }) {
   return (
-    <div className="w-full">
+    <div className="form-field">
       {label && (
         <label
           htmlFor={id || name}
-          className="block text-sm font-semibold text-gray-700 mb-2"
+          className="form-label"
         >
           {label}
-          {required && <span className="text-red-600 ml-1">*</span>}
+          {required && <span className="field-required">*</span>}
         </label>
       )}
       <input
@@ -47,14 +47,10 @@ function FormInput({
         autoComplete={autoComplete}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${name}-error` : undefined}
-        className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 transition ${
-          error
-            ? 'border-red-500 focus:ring-red-500 bg-red-50'
-            : 'border-gray-300 focus:ring-red-500 focus:border-transparent'
-        } disabled:bg-gray-100 disabled:cursor-not-allowed`}
+        className={`form-control ${error ? 'form-control-invalid' : ''}`}
       />
       {error && (
-        <p id={`${name}-error`} className="text-red-600 text-sm mt-1">
+        <p id={`${name}-error`} className="form-error">
           {error}
         </p>
       )}

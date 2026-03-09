@@ -31,7 +31,7 @@ function App() {
   // Show loading spinner while auth state is being synced
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-background)' }}>
         <LoadingSpinner message="Loading..." size="lg" />
       </div>
     );
@@ -41,13 +41,13 @@ function App() {
     <BrowserRouter>
       <Header/>
       <Routes>
-        <Route path='/' element={<RequireAuth><Homepage/></RequireAuth>} />
+        <Route path='/' element={<Homepage/>}/>
         <Route path='/about' element={<About/>} />
         <Route path='/contact' element={<Contact/>} />
         <Route path='/login' element={<Login />} />
         <Route path='/signup' element={<Signup />} />
         <Route path='/forgot-password' element={<ForgotPassword/>} />
-        <Route path='/reset-password/:token' element={<ResetPassword/>} />
+        <Route path='/reset-password' element={<ResetPassword/>} />
         <Route path='/profile' element={<RequireAuth><Profile/></RequireAuth>} />
         <Route path='/admin' element={<RequireAuth><AdminDashboard/></RequireAuth>} />
         <Route path="/donate" element={<RequireAuth><Donate /></RequireAuth>} />

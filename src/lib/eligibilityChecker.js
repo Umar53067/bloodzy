@@ -75,6 +75,30 @@ export const checkDonorEligibility = (donor) => {
     }
   }
 
+  // Recent surgery check
+  if (donor.last_surgery_date) {
+    const lastSurgeryDate = new Date(donor.last_surgery_date);
+    const daysSinceSurgery = Math.floor(
+      (now - lastSurgeryDate) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysSinceSurgery < ELIGIBILITY_CRITERIA.MIN_DAYS_AFTER_SURGERY) {
+      reasons.push(INELIGIBILITY_REASONS.RECENT_SURGERY);
+    }
+  }
+
+  // Recent vaccine check
+  if (donor.last_vaccine_date) {
+    const lastVaccineDate = new Date(donor.last_vaccine_date);
+    const daysSinceVaccine = Math.floor(
+      (now - lastVaccineDate) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysSinceVaccine < ELIGIBILITY_CRITERIA.MIN_DAYS_AFTER_VACCINE) {
+      reasons.push(INELIGIBILITY_REASONS.RECENT_VACCINE);
+    }
+  }
+
   // Medical conditions
   if (donor.pregnant) {
     reasons.push(INELIGIBILITY_REASONS.PREGNANT);

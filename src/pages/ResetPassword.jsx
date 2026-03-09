@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import FormInput from '../components/FormInput';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import Card from '../components/Card';
+import { updatePassword } from '../lib/authService';
 
 function ResetPassword() {
-  const { token } = useParams();
   const navigate = useNavigate();
 
   const [newPassword, setNewPassword] = useState("");
@@ -48,7 +48,13 @@ function ResetPassword() {
     setLoading(true);
 
     try {
-      // Mock reset password - API removed
+      const { error: updateError } = await updatePassword(newPassword);
+
+      if (updateError) {
+        setError(updateError);
+        return;
+      }
+
       setMessage("Password reset successful! Redirecting to login...");
       setTimeout(() => navigate("/login"), 2000);
     } catch (err) {

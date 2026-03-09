@@ -4,6 +4,7 @@ import FormInput from '../components/FormInput';
 import Button from '../components/Button';
 import AlertMessage from '../components/AlertMessage';
 import Card from '../components/Card';
+import { sendPasswordResetEmail } from '../lib/authService';
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -36,7 +37,13 @@ function ForgotPassword() {
     setLoading(true);
 
     try {
-      // Mock forgot password - API removed
+      const { error: resetError } = await sendPasswordResetEmail(email);
+
+      if (resetError) {
+        setError(resetError);
+        return;
+      }
+
       setMessage("Check your email for reset link");
       setEmail("");
     } catch (err) {

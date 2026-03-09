@@ -6,7 +6,7 @@ import React from 'react';
  */
 function Card({ children, className = '', padding = 'p-6', shadow = 'shadow-lg' }) {
   return (
-    <div className={`bg-white rounded-lg ${padding} ${shadow} ${className}`}>
+    <div className={`ui-card ${padding} ${shadow} ${className}`}>
       {children}
     </div>
   );

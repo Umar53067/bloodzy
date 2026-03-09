@@ -69,7 +69,9 @@ npm install
 Create `.env.local`:
 ```env
 VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_publishable_key
+# Optional legacy fallback:
+# VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 VITE_SOCKET_IO_URL=http://localhost:3000  # Add for notifications
 ```
 
@@ -234,6 +236,57 @@ bloodzy-app/
 | **Maps** | Leaflet | 1.9.4 |
 | **Icons** | Lucide React | Latest |
 | **UI Components** | Tailwind + Custom | Custom |
+
+---
+
+## 🎨 UI/UX Design System
+
+The application now uses a synchronized design system for consistent visual language across buttons, forms, cards, headers, and footers.
+
+### Theme Colors
+- **Primary:** `#1E90FF`
+- **Secondary:** `#7C3AED`
+- **Background:** `#F5F7FB`
+- **Surface:** `#FFFFFF`
+- **Text:** `#0F1724`
+- **Muted Text:** `#6B7280`
+- **Accents:** Success `#10B981`, Danger `#EF4444`, Warning `#F59E0B`
+
+### Typography
+- **Primary Font:** Inter
+- **Secondary Font:** Poppins (headings)
+- **Hierarchy:** H1 `36px`, H2 `28px`, H3 `22px`, H4 `18px`, Body `16px`, Small `14px`
+- **Weights:** Regular (400), Medium (500), SemiBold (600), Bold (700)
+
+### Component Standards
+- **Buttons:** Shared `.btn` API with variants (`.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-success`) and size tokens (`.btn-sm`, `.btn-md`, `.btn-lg`)
+- **Form Inputs/Selects:** Shared `.form-control` with unified focus ring and error handling (`.form-control-invalid`, `.form-error`)
+- **Cards:** Shared `.ui-card` radius and shadow
+- **Header/Footer:** Shared brand styles, nav/link states, spacing scale, and responsive behavior
+
+### Interaction States
+- Hover, active, focus-visible, and disabled states are standardized across interactive components.
+- All focusable controls use a visible accessible ring (`--color-focus-ring`).
+- Transitions are smooth and short (`--transition-fast`, `--transition-base`) for modern but subtle motion.
+
+### Responsive Rules
+- Mobile-first layout with synchronized breakpoints.
+- Typography scales down on small screens while preserving hierarchy.
+- Navigation transitions between desktop inline nav and mobile slide-in menu.
+
+### Icons & Imagery
+- Use Lucide outlined icons consistently across the app.
+- Keep imagery style consistent (rounded corners, soft shadow) and include accessible alt text.
+
+### Implementation Location
+- Core tokens and reusable classes: `src/App.css`
+- Reusable components consuming the system:
+  - `src/components/Button.jsx`
+  - `src/components/FormInput.jsx`
+  - `src/components/FormSelect.jsx`
+  - `src/components/Card.jsx`
+  - `src/components/Header.jsx`
+  - `src/components/Footer.jsx`
 
 ---
 

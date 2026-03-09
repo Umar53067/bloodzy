@@ -7,7 +7,7 @@ import Button from "../components/Button";
 import AlertMessage from "../components/AlertMessage";
 import { BLOOD_TYPES, GENDERS, TYPOGRAPHY } from "../constants";
 import { useDonor } from "../hooks/useDonor";
-import { updateUserProfile } from "../lib/authService";
+import { getCurrentUser, updateUserProfile } from "../lib/authService";
 import { User, Mail, Calendar, Droplet, Phone, Map, Activity, CheckCircle, AlertCircle } from "lucide-react";
 
 function Profile() {
@@ -55,11 +55,13 @@ function Profile() {
       setError("");
 
       try {
-        // Mock user data
-        const mockUser = {
-          username: authUser?.username || "User",
-          email: authUser?.email || "user@example.com",
-          createdAt: new Date(),
+        const { user: currentUser } = await getCurrentUser();
+
+        const resolvedUser = {
+          username:
+            currentUser?.user_metadata?.username || authUser?.username || "User",
+          email: currentUser?.email || authUser?.email || "user@example.com",
+          createdAt: currentUser?.created_at || null,
         };
 
         // Fetch actual donor profile from Supabase
@@ -71,8 +73,11 @@ function Profile() {
         }
 
         if (mounted) {
-          setMe(mockUser);
-          setProfileForm({ username: mockUser.username, email: mockUser.email });
+          setMe(resolvedUser);
+          setProfileForm({
+            username: resolvedUser.username,
+            email: resolvedUser.email,
+          });
 
           // Set donor data if exists
           if (donorData) {
@@ -155,6 +160,7 @@ function Profile() {
 
   const handleProfileSave = async (e) => {
     e.preventDefault();
+    setSaving(true);
     setError("");
     setSuccess("");
     try {
@@ -172,6 +178,8 @@ function Profile() {
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(err.message || "Update failed. Please try again.");
+    } finally {
+      setSaving(false);
     }
   };
 

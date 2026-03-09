@@ -4,7 +4,6 @@ import { Menu, X } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../features/auth/authSlice";
 import { signOut } from "../lib/authService";
-import Button from "./Button";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,21 +47,21 @@ function Header() {
   const linksToShow = token ? userLinks : guestLinks;
 
   return (
-    <header className="sticky top-0 bg-white border-b z-30">
-      <div className="container mx-auto flex items-center justify-between h-16 px-4">
+    <header className="site-header">
+      <div className="ui-container site-header-inner">
         {/* Logo */}
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 bg-red-600 rounded-full"></div>
-          <span className="text-xl font-bold text-red-600">Bloodzy</span>
+          <div className="brand-mark"></div>
+          <span className="brand-text">Bloodzy</span>
         </div>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="site-nav">
           {linksToShow.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className="text-sm font-medium text-gray-700 hover:text-red-600 transition"
+              className="site-nav-link"
             >
               {link.label}
             </Link>
@@ -70,31 +69,25 @@ function Header() {
         </nav>
 
         {/* Desktop Auth Buttons */}
-        <div className="hidden md:flex gap-3">
+        <div className="site-auth">
           {!token ? (
             <>
-              <Button variant="secondary" size="sm">
-                <Link to="/login">Login</Link>
-              </Button>
-              <Button variant="primary" size="sm">
-                <Link to="/signup" className="text-white">Signup</Link>
-              </Button>
+              <Link to="/login" className="btn btn-secondary btn-sm">Login</Link>
+              <Link to="/signup" className="btn btn-primary btn-sm">Signup</Link>
             </>
           ) : (
             <>
-              <Button variant="secondary" size="sm">
-                <Link to="/profile">Profile</Link>
-              </Button>
-              <Button variant="primary" size="sm" onClick={handleLogout}>
+              <Link to="/profile" className="btn btn-secondary btn-sm">Profile</Link>
+              <button type="button" className="btn btn-primary btn-sm" onClick={handleLogout}>
                 Logout
-              </Button>
+              </button>
             </>
           )}
         </div>
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-red-600 p-2 hover:bg-gray-100 rounded transition"
+          className="mobile-menu-toggle icon-button"
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle menu"
           aria-expanded={isOpen}
@@ -105,15 +98,15 @@ function Header() {
 
       {/* Mobile Menu */}
       <div className={`${
-        isOpen ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
-      } fixed top-16 left-0 right-0 bg-white border-t shadow-lg transition-all duration-200 z-40 max-h-[calc(100vh-64px)] overflow-y-auto md:hidden`}>
+        isOpen ? 'mobile-menu-open' : 'mobile-menu-closed'
+      } site-mobile-menu`}>
         {/* Nav Links */}
-        <nav className="flex flex-col px-4 py-4 space-y-2">
+        <nav className="site-mobile-nav">
           {linksToShow.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className="text-base font-medium text-gray-700 hover:text-red-600 py-2 px-3 rounded hover:bg-red-50 transition"
+              className="site-mobile-link"
               onClick={() => setIsOpen(false)}
             >
               {link.label}
@@ -122,24 +115,18 @@ function Header() {
         </nav>
 
         {/* Auth Section */}
-        <div className="border-t px-4 py-4 space-y-3">
+        <div className="site-mobile-auth">
           {!token ? (
             <>
-              <Button variant="secondary" fullWidth size="md">
-                <Link to="/login" className="w-full block text-center">Login</Link>
-              </Button>
-              <Button variant="primary" fullWidth size="md">
-                <Link to="/signup" className="w-full block text-center text-white">Sign Up</Link>
-              </Button>
+              <Link to="/login" className="btn btn-secondary btn-md btn-full text-center" onClick={() => setIsOpen(false)}>Login</Link>
+              <Link to="/signup" className="btn btn-primary btn-md btn-full text-center" onClick={() => setIsOpen(false)}>Sign Up</Link>
             </>
           ) : (
             <>
-              <Button variant="secondary" fullWidth size="md">
-                <Link to="/profile" className="w-full block text-center">Profile</Link>
-              </Button>
-              <Button variant="primary" fullWidth size="md" onClick={handleLogout}>
+              <Link to="/profile" className="btn btn-secondary btn-md btn-full text-center" onClick={() => setIsOpen(false)}>Profile</Link>
+              <button type="button" className="btn btn-primary btn-md btn-full" onClick={handleLogout}>
                 Logout
-              </Button>
+              </button>
             </>
           )}
         </div>

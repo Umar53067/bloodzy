@@ -57,48 +57,48 @@ export const disconnectSocket = () => {
  * Subscribe to blood group notifications
  */
 export const subscribeToBloodGroup = (bloodGroup, userId) => {
-  const socket = getSocket();
-  socket.emit("subscribe_blood_group", bloodGroup, userId);
+  const socketInstance = getSocket();
+  socketInstance.emit("subscribe_blood_group", bloodGroup, userId);
 };
 
 /**
  * Emit blood request
  */
 export const emitBloodRequest = (requestData) => {
-  const socket = getSocket();
-  socket.emit("new_blood_request", requestData);
+  const socketInstance = getSocket();
+  socketInstance.emit("new_blood_request", requestData);
 };
 
 /**
  * Update donor status
  */
 export const emitDonorStatusChange = (statusData) => {
-  const socket = getSocket();
-  socket.emit("donor_status_change", statusData);
+  const socketInstance = getSocket();
+  socketInstance.emit("donor_status_change", statusData);
 };
 
 /**
  * Listen to blood request alerts
  */
 export const onBloodRequestAlert = (callback) => {
-  const socket = getSocket();
-  socket.on("blood_request_alert", callback);
+  const socketInstance = getSocket();
+  socketInstance.on("blood_request_alert", callback);
 };
 
 /**
  * Listen to donor status updates
  */
 export const onDonorStatusUpdate = (callback) => {
-  const socket = getSocket();
-  socket.on("donor_status_update", callback);
+  const socketInstance = getSocket();
+  socketInstance.on("donor_status_update", callback);
 };
 
 /**
  * Remove event listeners
  */
 export const removeListener = (event) => {
-  const socket = getSocket();
-  socket.off(event);
+  const socketInstance = getSocket();
+  socketInstance.off(event);
 };
 
 /**

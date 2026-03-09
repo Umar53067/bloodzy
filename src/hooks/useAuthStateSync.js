@@ -12,33 +12,25 @@ export const useAuthStateSync = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const mapSessionToAuthPayload = (session) => ({
+      user: {
+        id: session.user.id,
+        email: session.user.email,
+        username:
+          session.user.user_metadata?.username ||
+          session.user.email?.split('@')[0],
+      },
+      token: session.access_token,
+    });
+
     // Subscribe to auth state changes
     const subscription = onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        // User signed in
-        dispatch(login({
-          user: {
-            id: session.user.id,
-            email: session.user.email,
-            username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
-          },
-          token: session.access_token,
-        }));
+      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.user) {
+        dispatch(login(mapSessionToAuthPayload(session)));
       } else if (event === 'SIGNED_OUT') {
-        // User signed out
         dispatch(logout());
-      } else if (event === 'TOKEN_REFRESHED') {
-        // Token was refreshed, update if needed
-        if (session?.user) {
-          dispatch(login({
-            user: {
-              id: session.user.id,
-              email: session.user.email,
-              username: session.user.user_metadata?.username || session.user.email?.split('@')[0],
-            },
-            token: session.access_token,
-          }));
-        }
+      } else if (event === 'INITIAL_SESSION' && !session) {
+        dispatch(logout());
       }
       
       setLoading(false);

@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabase";
+import { useCallback } from "react";
 
 /**
  * Custom hook for donation history operations
@@ -11,7 +12,7 @@ export const useDonationHistory = () => {
    * @param {Object} donationData - Donation details
    * @returns {Promise} - { data, error }
    */
-  const recordDonation = async (userId, donationData) => {
+  const recordDonation = useCallback(async (userId, donationData) => {
     try {
       // Update donor's last_donation field
       const { data: updateData, error: updateError } = await supabase
@@ -44,7 +45,7 @@ export const useDonationHistory = () => {
       console.error("Error recording donation:", error);
       return { data: null, error: error.message };
     }
-  };
+  }, []);
 
   /**
    * Get donation history for a user
@@ -52,7 +53,7 @@ export const useDonationHistory = () => {
    * @param {number} limit - Number of records to fetch
    * @returns {Promise} - { data, error }
    */
-  const getDonationHistory = async (userId, limit = 10) => {
+  const getDonationHistory = useCallback(async (userId, limit = 10) => {
     try {
       const { data, error } = await supabase
         .from("donation_records")
@@ -67,14 +68,14 @@ export const useDonationHistory = () => {
       console.error("Error fetching donation history:", error);
       return { data: null, error: error.message };
     }
-  };
+  }, []);
 
   /**
    * Get donation statistics for a user
    * @param {string} userId - User ID
    * @returns {Promise} - { data, error }
    */
-  const getDonationStats = async (userId) => {
+  const getDonationStats = useCallback(async (userId) => {
     try {
       const { data, error } = await supabase
         .from("donation_records")
@@ -132,7 +133,7 @@ export const useDonationHistory = () => {
       console.error("Error calculating donation stats:", error);
       return { data: null, error: error.message };
     }
-  };
+  }, []);
 
   /**
    * Get donation records for a date range
@@ -141,7 +142,7 @@ export const useDonationHistory = () => {
    * @param {Date} endDate - End date
    * @returns {Promise} - { data, error }
    */
-  const getDonationsByDateRange = async (userId, startDate, endDate) => {
+  const getDonationsByDateRange = useCallback(async (userId, startDate, endDate) => {
     try {
       const { data, error } = await supabase
         .from("donation_records")
@@ -157,14 +158,14 @@ export const useDonationHistory = () => {
       console.error("Error fetching donations by date range:", error);
       return { data: null, error: error.message };
     }
-  };
+  }, []);
 
   /**
    * Delete a donation record (admin only)
    * @param {number} donationId - Donation record ID
    * @returns {Promise} - { data, error }
    */
-  const deleteDonationRecord = async (donationId) => {
+  const deleteDonationRecord = useCallback(async (donationId) => {
     try {
       const { data, error } = await supabase
         .from("donation_records")
@@ -177,7 +178,7 @@ export const useDonationHistory = () => {
       console.error("Error deleting donation record:", error);
       return { data: null, error: error.message };
     }
-  };
+  }, []);
 
   return {
     recordDonation,

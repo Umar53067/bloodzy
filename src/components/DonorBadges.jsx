@@ -50,7 +50,7 @@ export default function DonorBadges({ userId, userData = {} }) {
     if (userId) {
       fetchData();
     }
-  }, [userId]);
+  }, [userId, getDonationStats]);
 
   if (loading) {
     return (
@@ -205,7 +205,7 @@ function BadgeShowcase({ badge, unlocked }) {
         unlocked
           ? "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300 shadow-md"
           : "bg-gray-100 border-gray-300 opacity-50"
-      }`}
+      } relative`}
     >
       <div className={`text-4xl mb-2 ${unlocked ? "" : "filter grayscale"}`}>
         {badge.icon}

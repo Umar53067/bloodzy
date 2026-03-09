@@ -42,7 +42,7 @@ export default function DonationHistory({ userId }) {
     if (userId) {
       fetchData();
     }
-  }, [userId]);
+  }, [userId, getDonationHistory, getDonationStats]);
 
   if (loading) {
     return (

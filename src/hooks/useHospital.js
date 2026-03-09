@@ -200,11 +200,15 @@ export const useHospital = () => {
     try {
       const { data, error } = await supabase
         .from("hospitals")
-        .select("city")
-        .distinct();
+        .select("city");
 
       if (error) throw error;
-      return { data, error: null };
+
+      const uniqueCities = Array.from(
+        new Set((data || []).map((item) => item.city).filter(Boolean))
+      ).map((city) => ({ city }));
+
+      return { data: uniqueCities, error: null };
     } catch (error) {
       console.error("Error fetching cities:", error);
       return { data: null, error: error.message };

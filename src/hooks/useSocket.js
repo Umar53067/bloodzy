@@ -1,12 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import {
   initializeSocket,
-  getSocket,
   subscribeToBloodGroup,
-  onBloodRequestAlert,
-  onDonorStatusUpdate,
-  removeListener,
-  isSocketConnected,
 } from "../lib/socketService";
 
 /**
@@ -22,15 +17,18 @@ export const useSocket = () => {
     const socketInstance = initializeSocket();
     setSocket(socketInstance);
 
-    socketInstance.on("connect", () => {
+    const handleConnect = () => {
       setConnected(true);
       console.log("Socket connected:", socketInstance.id);
-    });
+    };
 
-    socketInstance.on("disconnect", () => {
+    const handleDisconnect = () => {
       setConnected(false);
       console.log("Socket disconnected");
-    });
+    };
+
+    socketInstance.on("connect", handleConnect);
+    socketInstance.on("disconnect", handleDisconnect);
 
     // Listen for blood request alerts
     const handleBloodRequestAlert = (data) => {
@@ -64,8 +62,10 @@ export const useSocket = () => {
     socketInstance.on("donor_status_update", handleDonorStatusUpdate);
 
     return () => {
-      socketInstance.off("blood_request_alert");
-      socketInstance.off("donor_status_update");
+      socketInstance.off("connect", handleConnect);
+      socketInstance.off("disconnect", handleDisconnect);
+      socketInstance.off("blood_request_alert", handleBloodRequestAlert);
+      socketInstance.off("donor_status_update", handleDonorStatusUpdate);
     };
   }, []);
 

@@ -98,9 +98,11 @@ export default function HospitalCard({ hospital, onSelect }) {
       )}
 
       {/* Coordinates */}
-      <div className="text-xs text-gray-500 mb-4">
-        Coordinates: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
-      </div>
+      {location?.latitude != null && location?.longitude != null && (
+        <div className="text-xs text-gray-500 mb-4">
+          Coordinates: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
+        </div>
+      )}
 
       {/* Action Button */}
       <button

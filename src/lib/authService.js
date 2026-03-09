@@ -19,9 +19,9 @@ export const signUp = async (email, password, metadata = {}) => {
     });
     
     if (error) throw new Error(error.message);
-    return { user: data.user, error: null };
+    return { user: data.user, session: data.session, error: null };
   } catch (error) {
-    return { user: null, error: error.message };
+    return { user: null, session: null, error: error.message };
   }
 };
 

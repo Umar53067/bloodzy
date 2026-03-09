@@ -76,7 +76,7 @@ function Signup() {
 
     try {
       // Sign up with Supabase
-      const { user, error: authError } = await signUp(email, password, {
+      const { user, session, error: authError } = await signUp(email, password, {
         username,
       });
 
@@ -86,7 +86,7 @@ function Signup() {
         return;
       }
 
-      if (user) {
+      if (user && session?.access_token) {
         // Dispatch login action
         dispatch(
           login({
@@ -95,7 +95,7 @@ function Signup() {
               email: user.email,
               username: username,
             },
-            token: user.id, // Use user ID as temporary token until session is established
+            token: session.access_token,
           })
         );
 
@@ -107,6 +107,9 @@ function Signup() {
         // Show success and redirect
         setError(''); // Clear any errors
         setTimeout(() => navigate('/'), 500);
+      } else if (user) {
+        setError('Account created, but session could not be established. Please log in.');
+        setTimeout(() => navigate('/login'), 1200);
       }
     } catch (err) {
       setError(err.message || 'Signup failed. Please try again.');

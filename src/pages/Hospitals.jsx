@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import { useHospital } from "../hooks/useHospital";
 import { useAuthStateSync } from "../hooks/useAuthStateSync";
 import HospitalCard from "../components/HospitalCard";
@@ -7,7 +8,8 @@ import AlertMessage from "../components/AlertMessage";
 import { Search, MapPin, AlertCircle } from "lucide-react";
 
 export default function Hospitals() {
-  const isAuthenticated = useAuthStateSync();
+  const { loading: authLoading } = useAuthStateSync();
+  const token = useSelector((state) => state.auth.token);
   const { getHospitals, searchHospitals, getCitiesWithHospitals } =
     useHospital();
 
@@ -79,8 +81,8 @@ export default function Hospitals() {
     if (searchTerm) {
       results = results.filter(
         (h) =>
-          h.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          h.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          h.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          h.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (h.blood_types &&
             h.blood_types.toLowerCase().includes(searchTerm.toLowerCase()))
       );
@@ -93,7 +95,15 @@ export default function Hospitals() {
     setSelectedHospital(hospital);
   };
 
-  if (!isAuthenticated) {
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (!token) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
