@@ -288,10 +288,12 @@ function Find() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-red-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-red-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
         
-        <div className="relative z-10">
+        <div className="relative z-10"> 
           <h1 className="text-5xl md:text-6xl font-bold mb-4 leading-tight">Find Blood Donors Near You</h1>
-          <p className="text-xl text-red-100 max-w-2xl mx-auto mb-8">Connect with verified donors in your area. Save lives in minutes, not hours.</p>
-
+          <div className="flex justify-center items-center">
+<p className="text-base sm:text-lg md:text-xl lg:text-2xl text-red-100 max-w-2xl mx-auto mb-6 sm:mb-8 px-4 sm:px-0 leading-relaxed text-center">
+  Connect with verified donors in your area. Save lives in minutes, not hours.
+</p></div>
           <div className="mt-8 max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-4 mb-4">
             <div>
               <label className="block text-left text-red-100 text-sm font-medium mb-2">Blood Group</label>
