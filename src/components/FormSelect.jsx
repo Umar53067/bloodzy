@@ -15,6 +15,8 @@ function FormSelect({
   error = null,
   disabled = false,
   placeholder = 'Select an option',
+  className = '',
+  ...rest
 }) {
   return (
     <div className="form-field">
@@ -36,7 +38,8 @@ function FormSelect({
         disabled={disabled}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${name}-error` : undefined}
-        className={`form-control ${error ? 'form-control-invalid' : ''}`}
+        className={`form-control ${error ? 'form-control-invalid' : ''} ${className}`}
+        {...rest}
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (

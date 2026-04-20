@@ -21,16 +21,17 @@ export const useBloodRequest = () => {
         .insert([
           {
             user_id: userId,
-            patient_name: requestData.patientName,
+            patient_name: requestData.patientName || null,
             blood_group: requestData.bloodGroup,
-            units: requestData.units,
-            hospital: requestData.hospital,
+            units: requestData.units || 1,
+            hospital: requestData.hospital || null,
             city: requestData.city,
-            urgency: requestData.urgency || 'normal', // 'low', 'normal', 'urgent'
+            urgency: requestData.urgency || 'urgent', // 'low', 'normal', 'urgent'
             status: 'pending', // 'pending', 'fulfilled', 'cancelled'
             description: requestData.description || null,
             contact_phone: requestData.contactPhone,
-            contact_email: requestData.contactEmail,
+            contact_email: requestData.contactEmail || null,
+            is_anonymous: !userId,
             created_at: new Date().toISOString(),
           }
         ])

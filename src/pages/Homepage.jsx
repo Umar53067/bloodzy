@@ -1,58 +1,60 @@
+import React from "react";
 import { Link } from "react-router-dom";
 import Button from "../components/Button";
 import { Droplet, Heart, Users, Clock, Shield, Activity, ChevronRight } from "lucide-react";
 
-function Homepage() {
-  // Stats data
-  const stats = [
-    { icon: Users, label: "Registered Donors", value: "5,200+" },
-    { icon: Droplet, label: "Donations Made", value: "12,800+" },
-    { icon: Heart, label: "Lives Saved", value: "38,400+" },
-  ];
+// Move static data outside the component to prevent recreation on every render
+const stats = [
+  { icon: Users, label: "Registered Donors", value: "5,200+" },
+  { icon: Droplet, label: "Donations Made", value: "12,800+" },
+  { icon: Heart, label: "Lives Saved", value: "38,400+" },
+];
 
-  // Reasons data
-  const reasons = [
-    {
-      icon: Clock,
-      title: "Takes Only an Hour",
-      description: "The entire donation process takes about an hour of your time, from check-in to refreshments."
-    },
-    {
-      icon: Shield,
-      title: "Safe & Regulated",
-      description: "All procedures follow strict medical guidelines. Sterile equipment is used once and discarded."
-    },
-    {
-      icon: Activity,
-      title: "Health Check Included",
-      description: "Get a mini health check-up before every donation—blood pressure, hemoglobin, and pulse."
-    }
-  ];
+const reasons = [
+  {
+    icon: Clock,
+    title: "Takes Only an Hour",
+    description: "The entire donation process takes about an hour of your time, from check-in to refreshments."
+  },
+  {
+    icon: Shield,
+    title: "Safe & Regulated",
+    description: "All procedures follow strict medical guidelines. Sterile equipment is used once and discarded."
+  },
+  {
+    icon: Activity,
+    title: "Health Check Included",
+    description: "Get a mini health check-up before every donation—blood pressure, hemoglobin, and pulse."
+  }
+];
 
-  // Testimonials
-  const testimonials = [
-    {
-      quote: "I was nervous at first, but the staff made me feel comfortable. Knowing I helped save a child's life is indescribable.",
-      name: "Priya K.",
-      role: "Regular Donor"
-    },
-    {
-      quote: "My father needed blood during surgery. Strangers donated—now I donate regularly to pay it forward.",
-      name: "Rahul M.",
-      role: "Donor since 2022"
-    }
-  ];
+const testimonials = [
+  {
+    quote: "I was nervous at first, but the staff made me feel comfortable. Knowing I helped save a child's life is indescribable.",
+    name: "Priya K.",
+    role: "Regular Donor"
+  },
+  {
+    quote: "My father needed blood during surgery. Strangers donated—now I donate regularly to pay it forward.",
+    name: "Rahul M.",
+    role: "Donor since 2022"
+  }
+];
+
+const Homepage = React.memo(() => {
 
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section with Background Image */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         {/* Background Image with Overlay */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 bg-gray-200">
           <img 
-            src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2083&q=80" 
+            src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=70" 
             alt="Medical professional preparing blood donation equipment in a clean, modern clinic" 
             className="w-full h-full object-cover"
+            fetchpriority="high"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-red-900/90 to-red-700/80"></div>
         </div>
@@ -83,22 +85,22 @@ function Homepage() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/find">
+            <Link to="/request">
               <Button
                 variant="primary"
                 size="lg"
-                className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-10 py-4 rounded-xl shadow-2xl hover:shadow-red-500/30 transition-all transform hover:scale-105 w-full sm:w-auto focus:ring-4 focus:ring-red-300"
+                className="bg-red-600 hover:bg-red-700 text-white font-black text-xl md:text-2xl px-8 md:px-12 py-6 rounded-2xl shadow-2xl hover:shadow-red-500/50 transition-all transform hover:scale-105 w-full sm:w-auto focus:ring-4 focus:ring-red-300 border-2 border-red-400"
               >
-                🩸 Find Blood Now
+                🚨 NEED BLOOD NOW
               </Button>
             </Link>
             <Link to="/donate">
               <Button
                 variant="secondary"
                 size="lg"
-                className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-red-600 font-bold text-lg px-10 py-4 rounded-xl transition-all transform hover:scale-105 w-full sm:w-auto focus:ring-4 focus:ring-white/50"
+                className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-red-600 font-bold text-xl md:text-2xl px-8 md:px-12 py-6 rounded-2xl transition-all transform hover:scale-105 w-full sm:w-auto focus:ring-4 focus:ring-white/50"
               >
-                Become a Donor
+                ❤️ BECOME A DONOR
               </Button>
             </Link>
           </div>
@@ -180,23 +182,23 @@ function Homepage() {
           </div>
 
           {/* Final CTA – both actions */}
-          <div className="text-center mt-16 space-x-4">
-            <Link to="/donate">
+          <div className="text-center mt-16 flex flex-col sm:flex-row justify-center gap-4">
+            <Link to="/request">
               <Button
                 variant="primary"
                 size="lg"
-                className="bg-red-600 hover:bg-red-700 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105"
+                className="bg-red-600 hover:bg-red-700 text-white font-black text-xl px-10 py-5 rounded-xl shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 w-full sm:w-auto"
               >
-                Join as Donor
+                🚨 Request Blood Now
               </Button>
             </Link>
             <Link to="/find">
               <Button
                 variant="secondary"
                 size="lg"
-                className="border-2 border-red-600 text-red-600 hover:bg-red-50 font-bold text-lg px-8 py-4 rounded-xl transition-all transform hover:scale-105"
+                className="border-2 border-red-600 text-red-600 hover:bg-red-50 font-bold text-xl px-10 py-5 rounded-xl transition-all transform hover:scale-105 w-full sm:w-auto"
               >
-                Find Blood Now
+                Find Donors Nearby
               </Button>
             </Link>
           </div>
@@ -244,6 +246,6 @@ function Homepage() {
       `}</style>
     </div>
   );
-}
+});
 
 export default Homepage;

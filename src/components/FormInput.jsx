@@ -20,6 +20,8 @@ function FormInput({
   max,
   pattern,
   autoComplete,
+  className = '',
+  ...rest
 }) {
   return (
     <div className="form-field">
@@ -47,7 +49,8 @@ function FormInput({
         autoComplete={autoComplete}
         aria-invalid={error ? 'true' : 'false'}
         aria-describedby={error ? `${name}-error` : undefined}
-        className={`form-control ${error ? 'form-control-invalid' : ''}`}
+        className={`form-control ${error ? 'form-control-invalid' : ''} ${className}`}
+        {...rest}
       />
       {error && (
         <p id={`${name}-error`} className="form-error">

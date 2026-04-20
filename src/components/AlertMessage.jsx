@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle } from 'lucide-react';
  * Displays success, error, or warning messages with icons
  * Provides consistent styling and accessibility
  */
-function AlertMessage({ type = 'info', message, onClose = null }) {
+function AlertMessage({ type = 'info', message, onClose = null, className = '' }) {
   if (!message) return null;
 
   const styles = {
@@ -38,7 +38,7 @@ function AlertMessage({ type = 'info', message, onClose = null }) {
   return (
     <div
       role="alert"
-      className={`${style.container} ${style.text} p-4 rounded flex items-center gap-3 mb-4`}
+      className={`${style.container} ${style.text} p-4 rounded flex items-center gap-3 mb-4 ${className}`}
     >
       <Icon className={`${style.icon} flex-shrink-0`} size={20} />
       <span className="flex-1">{message}</span>

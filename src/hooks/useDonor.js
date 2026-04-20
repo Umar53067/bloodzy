@@ -30,6 +30,7 @@ export const useDonor = () => {
         .insert([
           {
             user_id: userId,
+            name: donorData.name || 'Donor',
             blood_group: donorData.bloodGroup,
             age: donorData.age,
             gender: donorData.gender,
@@ -102,33 +103,49 @@ export const useDonor = () => {
   }, []);
 
   /**
-   * Search nearby donors
-   * Returns ALL donors matching blood group and city criteria
-   * Shows multiple donors from the same location with different availability statuses
-   * 
-   * NOTE: If returning empty results, check Supabase RLS policies on the donors table.
-   * The policy should allow authenticated users to SELECT all donors (not just their own).
+   * Search nearby donors using server-side distance calculation (RPC)
+   * This is much faster than client-side filtering and reduces payload sizes.
    */
-  const searchNearbyDonors = useCallback(async (bloodGroup, city, limit = 500) => {
+  const searchNearbyDonors = useCallback(async (bloodGroup, city, radiusKm = 50, lat = null, lng = null, limit = 50) => {
     setLoading(true);
     setError(null);
     try {
-      let query = supabase
-        .from('donors')
-        .select('*', { count: 'exact' });
+      let data, err;
 
-      if (bloodGroup) {
-        query = query.eq('blood_group', bloodGroup);
+      // If we have coordinates, use the optimized RPC function for distance
+      if (lat !== null && lng !== null) {
+        const response = await supabase.rpc('search_donors_by_distance', {
+          search_blood_group: bloodGroup || null,
+          search_city: city || null,
+          search_lat: lat,
+          search_lng: lng,
+          radius_km: radiusKm,
+          max_limit: limit
+        });
+        data = response.data;
+        err = response.error;
+      } else {
+        // Fallback to normal query without exact count if location is not available
+        let query = supabase
+          .from('donors')
+          .select('*'); // Removed { count: 'exact' } for performance
+
+        if (bloodGroup) {
+          query = query.eq('blood_group', bloodGroup);
+        }
+
+        if (city) {
+          query = query.ilike('city', `%${city}%`);
+        }
+
+        const response = await query
+          .limit(limit)
+          .order('available', { ascending: false })
+          .order('created_at', { ascending: false });
+          
+        data = response.data;
+        err = response.error;
       }
-
-      if (city) {
-        query = query.ilike('city', `%${city}%`); // Case-insensitive partial match for better matching
-      }
-
-      const { data, error: err, count } = await query
-        .limit(limit)
-        .order('available', { ascending: false }) // Show available donors first
-        .order('created_at', { ascending: false }); // Then by creation date
 
       if (err) {
         console.error('Donor search error details:', {
@@ -138,7 +155,6 @@ export const useDonor = () => {
           hint: err.hint
         });
         
-        // Check if it's an RLS policy error or relationship error
         if (err.code === 'PGRST100' || err.message.includes('policy') || err.message.includes('relationship')) {
           throw new Error(`Database access denied. Check RLS policies: ${err.message}`);
         }
@@ -146,12 +162,11 @@ export const useDonor = () => {
         throw new Error(err.message || 'Failed to search donors');
       }
 
-      // Optionally fetch user data separately if needed
       let enrichedData = data || [];
       
+      // Optionally fetch user data
       if (enrichedData.length > 0) {
         try {
-          // Try to fetch user data for donors (optional enhancement)
           const userIds = enrichedData.map(d => d.user_id).filter(Boolean);
           if (userIds.length > 0) {
             const { data: users, error: userError } = await supabase
@@ -160,7 +175,6 @@ export const useDonor = () => {
               .in('id', userIds);
             
             if (!userError && users) {
-              // Map user data to donors
               const userMap = {};
               users.forEach(u => {
                 userMap[u.id] = { username: u.username, email: u.email };
@@ -174,12 +188,10 @@ export const useDonor = () => {
           }
         } catch (userErr) {
           console.warn('Could not fetch user data:', userErr.message);
-          // Continue without user data - not critical
         }
       }
 
-      // Log results for debugging
-      console.log(`Search donors - Blood: ${bloodGroup || 'Any'}, City: ${city || 'Any'}, Results: ${enrichedData?.length || 0}, Count: ${count}`);
+      console.log(`Search donors - Blood: ${bloodGroup || 'Any'}, City: ${city || 'Any'}, Results: ${enrichedData?.length || 0}`);
 
       return { data: enrichedData, error: null };
     } catch (err) {

@@ -32,16 +32,18 @@ function Header() {
   };
 
   // 🌍 Define links for each user type
-  const guestLinks = [
-    { to: "/about", label: "About Us" },
-    { to: "/contact", label: "Contact" },
-  ];
-
   const userLinks = [
     { to: "/", label: "Home" },
-    { to: "/donate", label: "Donate" },
+    { to: "/request", label: "Request Blood" },
     { to: "/find", label: "Find Donors" },
+    { to: "/donate", label: "Donate" },
     { to: "/hospitals", label: "Hospitals" },
+  ];
+
+  const guestLinks = [
+    { to: "/request", label: "Request Blood" },
+    { to: "/find", label: "Find Donors" },
+    { to: "/about", label: "About" },
   ];
 
   const linksToShow = token ? userLinks : guestLinks;
@@ -52,7 +54,10 @@ function Header() {
         {/* Logo */}
         <div className="flex items-center gap-2">
           <div className="brand-mark"></div>
-          <span className="brand-text">Bloodzy</span>
+          <div>
+            <span className="brand-text">Bloodzy</span>
+            <p className="brand-subtext">Fast blood help for Pakistan</p>
+          </div>
         </div>
 
         {/* Desktop Nav */}
@@ -70,10 +75,12 @@ function Header() {
 
         {/* Desktop Auth Buttons */}
         <div className="site-auth">
+          <Link to="/request" className="btn btn-danger btn-sm emergency-nav-btn">Need Blood</Link>
+          <Link to="/find" className="btn btn-secondary btn-sm">Find Donors</Link>
           {!token ? (
             <>
               <Link to="/login" className="btn btn-secondary btn-sm">Login</Link>
-              <Link to="/signup" className="btn btn-primary btn-sm">Signup</Link>
+              <Link to="/signup" className="btn btn-primary btn-sm">Join</Link>
             </>
           ) : (
             <>
@@ -100,6 +107,15 @@ function Header() {
       <div className={`${
         isOpen ? 'mobile-menu-open' : 'mobile-menu-closed'
       } site-mobile-menu`}>
+        <div className="site-mobile-emergency">
+          <Link to="/request" className="btn btn-danger btn-md btn-full text-center" onClick={() => setIsOpen(false)}>
+            Need Blood Now
+          </Link>
+          <Link to="/find" className="btn btn-secondary btn-md btn-full text-center" onClick={() => setIsOpen(false)}>
+            Find Donors Near Me
+          </Link>
+        </div>
+
         {/* Nav Links */}
         <nav className="site-mobile-nav">
           {linksToShow.map((link) => (
@@ -119,7 +135,7 @@ function Header() {
           {!token ? (
             <>
               <Link to="/login" className="btn btn-secondary btn-md btn-full text-center" onClick={() => setIsOpen(false)}>Login</Link>
-              <Link to="/signup" className="btn btn-primary btn-md btn-full text-center" onClick={() => setIsOpen(false)}>Sign Up</Link>
+              <Link to="/signup" className="btn btn-primary btn-md btn-full text-center" onClick={() => setIsOpen(false)}>Join</Link>
             </>
           ) : (
             <>
