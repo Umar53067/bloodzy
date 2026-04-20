@@ -355,27 +355,27 @@ function Find() {
       </section>
 
       {/* DONOR LIST + MAP */}
-      <main className="flex-1 container mx-auto px-4 py-12 grid md:grid-cols-2 gap-8">
+      <main className="flex-1 container mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {/* Donor List / Left Panel */}
-        <div className="space-y-4">
+        <div className="w-full max-w-4xl mx-auto space-y-4">
           {donors.length === 0 ? (
             <div className="grid gap-4">
-              <div className="p-4 border rounded-lg flex items-start gap-3">
-                <Droplets className="text-red-600"/>
+              <div className="p-4 sm:p-5 border rounded-lg flex items-start gap-3 bg-white">
+                <Droplets className="text-red-600 shrink-0 mt-0.5"/>
                 <div>
                   <div className="font-semibold">Every drop counts</div>
                   <div className="text-sm text-gray-600">One donation can save up to three lives. Search to see who needs you nearby.</div>
                 </div>
               </div>
-              <div className="p-4 border rounded-lg flex items-start gap-3">
-                <Shield className="text-red-600"/>
+              <div className="p-4 sm:p-5 border rounded-lg flex items-start gap-3 bg-white">
+                <Shield className="text-red-600 shrink-0 mt-0.5"/>
                 <div>
                   <div className="font-semibold">Safe and Simple</div>
                   <div className="text-sm text-gray-600">Modern blood donation is quick, safe, and monitored by professionals.</div>
                 </div>
               </div>
-              <div className="p-4 border rounded-lg flex items-start gap-3">
-                <Heart className="text-red-600"/>
+              <div className="p-4 sm:p-5 border rounded-lg flex items-start gap-3 bg-white">
+                <Heart className="text-red-600 shrink-0 mt-0.5"/>
                 <div>
                   <div className="font-semibold">Be the reason</div>
                   <div className="text-sm text-gray-600">Share hope in your community. Start by searching donors around you.</div>
@@ -387,16 +387,16 @@ function Find() {
               <div
                 key={donor.id}
                 onClick={() => handleDonorSelect(donor)}
-                className={`p-4 border rounded-lg cursor-pointer hover:shadow-md transition ${
+                className={`p-4 sm:p-5 border rounded-lg cursor-pointer hover:shadow-md transition bg-white ${
                   selectedDonor?.id === donor.id
                     ? "border-red-600"
                     : "border-gray-200"
                 }`}
               >
-                <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold">{donor.name || "Donor"}</h2>
+                <div className="flex flex-wrap gap-2 justify-between items-start sm:items-center">
+                  <h2 className="text-lg font-semibold break-words pr-2">{donor.name || "Donor"}</h2>
                   <span
-                    className={`px-2 py-1 rounded text-sm font-medium ${
+                    className={`px-2 py-1 rounded text-xs sm:text-sm font-medium whitespace-nowrap ${
                       donor.available
                         ? "bg-green-100 text-green-700"
                         : "bg-gray-200 text-gray-600"
@@ -422,77 +422,80 @@ function Find() {
           )}
         </div>
 
-        {/* Map */}
-        <div className="h-96 md:h-auto min-h-[400px] relative">
-          <MapContainer
-            center={mapCenter}
-            zoom={13}
-            className="h-full w-full rounded-lg z-0"
-          >
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            <MapUpdater center={mapCenter} />
-
-            {/* Donor Markers */}
-            {donors.length > 0 && donors.map((donor) => {
-              if (!donor.location || !donor.location.coordinates) {
-                console.warn(`⚠️ Skipping donor ${donor.id} - no valid coordinates`);
-                return null;
-              }
-              const lat = donor.location.coordinates[1];
-              const lng = donor.location.coordinates[0];
-              
-              if (isNaN(lat) || isNaN(lng)) {
-                console.warn(`⚠️ Skipping donor ${donor.id} - invalid coordinates:`, { lat, lng });
-                return null;
-              }
-              
-              console.log(`✓ Rendering marker for ${donor.name}:`, { lat, lng });
-              
-              return (
-                <Marker
-                  key={donor.id}
-                  position={[lat, lng]}
-                  title={donor.name}
-                >
-                  <Popup>
-                    <div className="min-w-[200px]">
-                      <strong>{donor.name}</strong>
-                      <br />
-                      <span className="text-red-600 font-semibold">Blood Group: {donor.bloodGroup}</span>
-                      <br />
-                      City: {donor.city}
-                      <br />
-                      Distance: <span className="font-semibold text-green-600">{donor.distance}</span>
-                      <br />
-                      Phone: {donor.phone}
-                      <br />
-                      Status: {donor.available ? <span className="text-green-600">✓ Available</span> : <span className="text-orange-600">⚠️ Unavailable</span>}
-                    </div>
-                  </Popup>
-                </Marker>
-              );
-            })}
-            
-            {/* Seeker Location Marker (if available) */}
-            {seekerLocation && (
-              <Marker 
-                position={[seekerLocation.lat, seekerLocation.lng]}
-                title="Your Location"
-              >
-                <Popup>
-                  <strong>📍 Your Location</strong>
-                  <br />
-                  Lat: {seekerLocation.lat.toFixed(4)}
-                  <br />
-                  Lng: {seekerLocation.lng.toFixed(4)}
-                </Popup>
-              </Marker>
-            )}
-          </MapContainer>
-        </div>
+        
       </main>
     </div>
   );
 }
 
 export default Find;
+
+
+// {/* Map */}
+//         <div className="h-96 md:h-auto min-h-[400px] relative">
+//           <MapContainer
+//             center={mapCenter}
+//             zoom={13}
+//             className="h-full w-full rounded-lg z-0"
+//           >
+//             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+//             <MapUpdater center={mapCenter} />
+
+//             {/* Donor Markers */}
+//             {donors.length > 0 && donors.map((donor) => {
+//               if (!donor.location || !donor.location.coordinates) {
+//                 console.warn(`⚠️ Skipping donor ${donor.id} - no valid coordinates`);
+//                 return null;
+//               }
+//               const lat = donor.location.coordinates[1];
+//               const lng = donor.location.coordinates[0];
+              
+//               if (isNaN(lat) || isNaN(lng)) {
+//                 console.warn(`⚠️ Skipping donor ${donor.id} - invalid coordinates:`, { lat, lng });
+//                 return null;
+//               }
+              
+//               console.log(`✓ Rendering marker for ${donor.name}:`, { lat, lng });
+              
+//               return (
+//                 <Marker
+//                   key={donor.id}
+//                   position={[lat, lng]}
+//                   title={donor.name}
+//                 >
+//                   <Popup>
+//                     <div className="min-w-[200px]">
+//                       <strong>{donor.name}</strong>
+//                       <br />
+//                       <span className="text-red-600 font-semibold">Blood Group: {donor.bloodGroup}</span>
+//                       <br />
+//                       City: {donor.city}
+//                       <br />
+//                       Distance: <span className="font-semibold text-green-600">{donor.distance}</span>
+//                       <br />
+//                       Phone: {donor.phone}
+//                       <br />
+//                       Status: {donor.available ? <span className="text-green-600">✓ Available</span> : <span className="text-orange-600">⚠️ Unavailable</span>}
+//                     </div>
+//                   </Popup>
+//                 </Marker>
+//               );
+//             })}
+            
+//             {/* Seeker Location Marker (if available) */}
+//             {seekerLocation && (
+//               <Marker 
+//                 position={[seekerLocation.lat, seekerLocation.lng]}
+//                 title="Your Location"
+//               >
+//                 <Popup>
+//                   <strong>📍 Your Location</strong>
+//                   <br />
+//                   Lat: {seekerLocation.lat.toFixed(4)}
+//                   <br />
+//                   Lng: {seekerLocation.lng.toFixed(4)}
+//                 </Popup>
+//               </Marker>
+//             )}
+//           </MapContainer>
+//         </div>
